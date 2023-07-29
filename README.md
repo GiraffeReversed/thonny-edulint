@@ -15,3 +15,8 @@ To install directly from Thonny:
 3. Click install.
 
 After installing you will need to restart Thonny.
+
+
+## License information
+
+The codebase of this plugin started as a copy of [thonny-flake](https://github.com/Bigjango13/thonny-flake) which is licensed under [MIT](https://github.com/Bigjango13/thonny-flake/blob/main/LICENSE).

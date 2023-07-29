@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setuptools.setup(
     name="thonny-edulint",
-    version="0.1.0",
+    version="0.1.1",
     author="Anna Rechtackova",
     author_email="anna.rechtackova@mail.muni.cz",
     description="A plugin that adds edulint warnings to the Thonny Python IDE.",
@@ -23,6 +23,6 @@ setuptools.setup(
     project_urls={
         'Bug Tracker': 'https://github.com/GiraffeReversed/thonny-edulint/issues',
     },
-    install_requires=["thonny >= 3.0.0", "edulint >= 2.0.0"],
+    install_requires=["thonny >= 3.0.0", "edulint >= 2.6.5", "m2r2", "Pygments"],
     python_requires=">=3.7",
 )

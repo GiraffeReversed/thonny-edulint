@@ -30,7 +30,7 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         python_executable_path = sys.executable
 
         self._proc = ui_utils.popen_with_ui_thread_callback(
-            [ python_executable_path, "-m", "edulint", "--json", main_file_path ],
+            [python_executable_path, "-m", "edulint", "--json", main_file_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
@@ -54,16 +54,16 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
 
     @classmethod
     def _edulint_finding_to_thonny_format(cls, edulint_finding):
-        text_headline = edulint_finding['text']
-        text_explanation = cls._get_single_edulint_explanation_in_rst(edulint_finding['code'])
+        text_headline = edulint_finding["text"]
+        text_explanation = cls._get_single_edulint_explanation_in_rst(edulint_finding["code"])
 
         atts = {}
         # atts["explanation"] = text_explanation
         atts["explanation_rst"] = text_explanation
-        atts["msg"] = text_headline   # note that this cut outs after first newline https://github.com/thonny/thonny/issues/1186
+        atts["msg"] = text_headline  # note that this cut outs after first newline https://github.com/thonny/thonny/issues/1186
 
         atts["filename"] = edulint_finding["path"]
-        
+
         atts["lineno"] = edulint_finding["line"]
         atts["col_offset"] = edulint_finding["column"]
 
@@ -80,20 +80,18 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
     @classmethod
     def _get_single_edulint_explanation_in_rst(cls, code: str) -> str:
         specific_explanation: Dict[str, str] = cls._get_all_edulint_explanations().get(code, {})
-        text_explanation_md: str = \
-            specific_explanation.get('why', '') + '\n\n' + \
-            specific_explanation.get('examples', '')
+        text_explanation_md: str = specific_explanation.get("why", "") + "\n\n" + specific_explanation.get("examples", "")
 
         text_explanation_rst = m2r2.convert(text_explanation_md)
         text_explanation_rst = text_explanation_rst.replace(".. code-block:: py", "::")  # Thonny doesn't show code block in Assistant correctly.
 
         return text_explanation_rst
 
-
     @staticmethod
     @lru_cache
     def _get_all_edulint_explanations():
         return edulint.get_explanations()
+
 
 def load_plugin():
     """Adds the edulint analyzer"""

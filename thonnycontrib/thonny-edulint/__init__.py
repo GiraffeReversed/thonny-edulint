@@ -7,10 +7,10 @@ import json
 from functools import lru_cache
 from typing import Dict
 
-from thonny import get_workbench, ui_utils
+from thonny import get_workbench, ui_utils, rst_utils
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
+from thonny.config_ui import ConfigurationPage
 
-from thonny import rst_utils
 import edulint
 import m2r2
 
@@ -20,9 +20,7 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
 
     def is_enabled(self):
         """Returns if the user has the option enabled"""
-        enabled = get_workbench().get_option("assistance.use_edulint")
-        if enabled == None:  # The option is currently not in UI.
-            enabled = True
+        enabled = get_workbench().get_option("edulint.enabled", True)
         return enabled
 
     def start_analysis(self, main_file_path, imported_file_paths):
@@ -93,6 +91,23 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         return edulint.get_explanations()
 
 
+class EdulintConfigPage(ConfigurationPage):
+    def __init__(self, master):
+        super().__init__(master)
+
+        self.add_checkbox(
+            "edulint.enabled",
+            "Enable edulint analysis",
+            row=2,
+            columnspan=2,
+        )
+
+    def apply(self):
+        get_workbench().set_default("edulint.enabled", True)
+
+
 def load_plugin():
     """Adds the edulint analyzer"""
     add_program_analyzer(EdulintAnalyzer)
+    get_workbench().set_default("edulint.enabled", True)
+    get_workbench().add_configuration_page("edulint", "Edulint", EdulintConfigPage, 81)

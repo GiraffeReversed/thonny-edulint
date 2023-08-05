@@ -77,10 +77,17 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
     @classmethod
     def _get_single_edulint_explanation_in_rst(cls, code: str) -> str:
         specific_explanation: Dict[str, str] = cls._get_all_edulint_explanations().get(code, {})
-        text_explanation_md: str = specific_explanation.get("why", "") + "\n\n" + specific_explanation.get("examples", "")
+        text_explanation_md: str = specific_explanation.get("why", "") + "\n"
+        
+        if specific_explanation.get("examples", ""):
+            text_explanation_md += "\n" + specific_explanation.get("examples", "") + "\n"
 
         text_explanation_rst = m2r2.convert(text_explanation_md)
-        text_explanation_rst = text_explanation_rst.replace(".. code-block:: py", "::")  # Thonny doesn't show code block in Assistant correctly.
+        # text_explanation_rst = text_explanation_rst.replace(".. code-block:: py", "::")  # This can be used to replace code-block with literal block.
+        text_explanation_rst = text_explanation_rst.replace(".. code-block:: py", ".. code::") 
+
+        # Syntax can be checked for example here:        
+        # https://raw.githubusercontent.com/thonny/thonny/66b3cb853cfc28ec504d29090d55ec86eee3f178/thonny/plugins/help/debugging.rst
 
         return text_explanation_rst
 

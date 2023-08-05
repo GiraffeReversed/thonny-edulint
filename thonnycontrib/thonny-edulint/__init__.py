@@ -20,8 +20,7 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
 
     def is_enabled(self):
         """Returns if the user has the option enabled"""
-        enabled = get_workbench().get_option("edulint.enabled", True)
-        return enabled
+        return get_workbench().get_option("edulint.enabled")
 
     def start_analysis(self, main_file_path, imported_file_paths):
         """Runs edulint on the currently open file."""
@@ -97,13 +96,14 @@ class EdulintConfigPage(ConfigurationPage):
 
         self.add_checkbox(
             "edulint.enabled",
-            "Enable edulint analysis",
+            "Enable Edulint analysis\n Enabling Edulint analysis disables PyLint for Assistant, as Edulint provides equivalent and improved functionality.",
             row=2,
             columnspan=2,
         )
 
     def apply(self):
-        get_workbench().set_default("edulint.enabled", True)
+        if get_workbench().get_option("edulint.enabled"):
+            get_workbench().set_option("assistance.use_pylint", False)
 
 
 def load_plugin():
@@ -111,3 +111,7 @@ def load_plugin():
     add_program_analyzer(EdulintAnalyzer)
     get_workbench().set_default("edulint.enabled", True)
     get_workbench().add_configuration_page("edulint", "Edulint", EdulintConfigPage, 81)
+
+    if get_workbench().get_option("edulint.enabled"):
+        get_workbench().set_default("assistance.use_pylint", False)
+        get_workbench().set_option("assistance.use_pylint", False)

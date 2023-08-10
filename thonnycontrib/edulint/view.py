@@ -15,6 +15,7 @@ from thonnycontrib.edulint.feedback_dialog import FeedbackDialog
 
 logger = getLogger(__name__)
 _program_analyzer_classes: List["ProgramAnalyzer"] = []
+ASK_FEEDBACK = False
 
 
 class EduLintView(tktextext.TextFrame):
@@ -62,15 +63,9 @@ class EduLintView(tktextext.TextFrame):
         italic_underline_font = main_font.copy()
         italic_underline_font.configure(slant="italic", size=main_font.cget("size"), underline=True)
 
-        self.text.tag_configure("feedback_link", justify="right", font=italic_underline_font)
-        self.text.tag_bind("feedback_link", "<ButtonRelease-1>", self._ask_feedback, True)
-        self.text.tag_configure("python_errors_link", justify="right", font=italic_underline_font)
-        self.text.tag_bind(
-            "python_errors_link",
-            "<ButtonRelease-1>",
-            lambda e: get_workbench().open_url("errors.rst"),
-            True,
-        )
+        if ASK_FEEDBACK:
+            self.text.tag_configure("feedback_link", justify="right", font=italic_underline_font)
+            self.text.tag_bind("feedback_link", "<ButtonRelease-1>", self._ask_feedback, True)
 
         get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
 
@@ -175,7 +170,7 @@ class EduLintView(tktextext.TextFrame):
                     ("em",),
                 )
 
-        if self.text.get("1.0", "end").strip():
+        if ASK_FEEDBACK and self.text.get("1.0", "end").strip():
             self._append_feedback_link()
 
     def _present_warnings(self):

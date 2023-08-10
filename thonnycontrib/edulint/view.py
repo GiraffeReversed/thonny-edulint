@@ -41,21 +41,6 @@ class EduLintView(tktextext.TextFrame):
 
         self._snapshots_per_main_file = {}
         self._current_snapshot = None
-        self.text.tag_configure(
-            "section_title",
-            spacing3=5,
-            font="BoldTkDefaultFont",
-            # foreground=get_syntax_options_for_tag("stderr")["foreground"]
-        )
-        self.text.tag_configure(
-            "intro",
-            # font="ItalicTkDefaultFont",
-            spacing3=10,
-        )
-        self.text.tag_configure("relevant_suggestion_title", font="BoldTkDefaultFont")
-        self.text.tag_configure("suggestion_title", lmargin2=16, spacing1=5, spacing3=5)
-        self.text.tag_configure("suggestion_body", lmargin1=16, lmargin2=16)
-        self.text.tag_configure("body", font="ItalicTkDefaultFont")
 
         main_font = tk.font.nametofont("TkDefaultFont")
 

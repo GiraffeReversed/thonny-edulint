@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setuptools.setup(
     name="thonny-edulint",
-    version="0.2.0",
+    version="0.2.1",
     author="Anna Rechtackova",
     author_email="anna.rechtackova@mail.muni.cz",
     description="A plugin that adds edulint warnings to the Thonny Python IDE.",

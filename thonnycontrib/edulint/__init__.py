@@ -7,9 +7,10 @@ import json
 from functools import lru_cache
 from typing import Dict
 
-from thonny import get_workbench, ui_utils, rst_utils
-from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
+from thonny import get_workbench, ui_utils
+from thonnycontrib.edulint.view import EduLintView, SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.config_ui import ConfigurationPage
+from thonny.languages import tr
 
 import edulint
 import m2r2
@@ -37,12 +38,12 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
     def _parse_and_output_warnings(self, _, out_lines, err_lines):
         """Parses the edulint output and sends it to thonny"""
 
-        warnings = []
         for error in err_lines:
             logging.getLogger("thonny").error("Edulint: %s", error)
 
         edulint_findings = json.loads("\n".join(out_lines))
 
+        warnings = []
         for edulint_finding in edulint_findings:
             thonny_finding = self._edulint_finding_to_thonny_format(edulint_finding)
             warnings.append(thonny_finding)
@@ -55,9 +56,9 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         text_explanation = cls._get_single_edulint_explanation_in_rst(edulint_finding["code"])
 
         atts = {}
-        # atts["explanation"] = text_explanation
         atts["explanation_rst"] = text_explanation
-        atts["msg"] = text_headline  # note that this cut outs after first newline https://github.com/thonny/thonny/issues/1186
+        # note that this cut outs after first newline https://github.com/thonny/thonny/issues/1186
+        atts["msg"] = text_headline
 
         atts["filename"] = edulint_finding["path"]
 
@@ -71,6 +72,7 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
 
         # remaining from edulint JSON: source, code, symbol
         # remaining in thonny dict: more_info_url
+        atts["code"] = edulint_finding["code"]
 
         return atts
 
@@ -78,15 +80,16 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
     def _get_single_edulint_explanation_in_rst(cls, code: str) -> str:
         specific_explanation: Dict[str, str] = cls._get_all_edulint_explanations().get(code, {})
         text_explanation_md: str = specific_explanation.get("why", "") + "\n"
-        
-        if specific_explanation.get("examples", ""):
-            text_explanation_md += "\n" + specific_explanation.get("examples", "") + "\n"
+
+        if "examples" in specific_explanation:
+            text_explanation_md += "\n" + specific_explanation["examples"] + "\n"
 
         text_explanation_rst = m2r2.convert(text_explanation_md)
-        # text_explanation_rst = text_explanation_rst.replace(".. code-block:: py", "::")  # This can be used to replace code-block with literal block.
-        text_explanation_rst = text_explanation_rst.replace(".. code-block:: py", ".. code::") 
+        # This can be used to replace code-block with literal block.
+        # text_explanation_rst = text_explanation_rst.replace(".. code-block:: py", "::")
+        text_explanation_rst = text_explanation_rst.replace(".. code-block:: py", ".. code::")
 
-        # Syntax can be checked for example here:        
+        # Syntax can be checked for example here:
         # https://raw.githubusercontent.com/thonny/thonny/66b3cb853cfc28ec504d29090d55ec86eee3f178/thonny/plugins/help/debugging.rst
 
         return text_explanation_rst
@@ -103,8 +106,17 @@ class EdulintConfigPage(ConfigurationPage):
 
         self.add_checkbox(
             "edulint.enabled",
-            "Enable Edulint analysis\n Enabling Edulint analysis disables PyLint for Assistant, as Edulint provides equivalent and improved functionality.",
+            "Enable Edulint analysis\n"
+            "Enabling Edulint analysis disables PyLint for Assistant, "
+            "as Edulint provides equivalent and improved functionality.",
             row=2,
+            columnspan=2,
+        )
+
+        self.add_checkbox(
+            "edulint.open_edulint_on_warnings",
+            tr("Open EduLint automatically when it has warnings for your code"),
+            row=3,
             columnspan=2,
         )
 
@@ -115,9 +127,12 @@ class EdulintConfigPage(ConfigurationPage):
 
 def load_plugin():
     """Adds the edulint analyzer"""
+    get_workbench().add_view(EduLintView, tr("EduLint"), "se", visible_by_default=False)
     add_program_analyzer(EdulintAnalyzer)
-    get_workbench().set_default("edulint.enabled", True)
+
     get_workbench().add_configuration_page("edulint", "Edulint", EdulintConfigPage, 81)
+    get_workbench().set_default("edulint.enabled", True)
+    get_workbench().set_default("edulint.open_edulint_on_warnings", False)
 
     if get_workbench().get_option("edulint.enabled"):
         get_workbench().set_default("assistance.use_pylint", False)

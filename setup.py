@@ -11,7 +11,7 @@ setuptools.setup(
     description="A plugin that adds edulint warnings to the Thonny Python IDE.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=["thonnycontrib.thonny-edulint"],
+    packages=["thonnycontrib.edulint"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Environment :: Plugins",

@@ -6,11 +6,12 @@ import sys
 import json
 from functools import lru_cache
 from typing import Dict
+from pathlib import Path
 
 from thonny import get_workbench, ui_utils
-from thonnycontrib.edulint.view import EduLintView, SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
+from thonnycontrib.edulint.view import EduLintView, SubprocessProgramAnalyzer, add_program_analyzer
 
 import edulint
 import m2r2
@@ -106,9 +107,9 @@ class EdulintConfigPage(ConfigurationPage):
 
         self.add_checkbox(
             "edulint.enabled",
-            "Enable Edulint analysis\n"
-            "Enabling Edulint analysis disables PyLint for Assistant, "
-            "as Edulint provides equivalent and improved functionality.",
+            "Enable EduLint analysis\n"
+            "Enabling EduLint analysis disables PyLint for Assistant, "
+            "as EduLint provides equivalent and improved functionality.",
             row=2,
             columnspan=2,
         )
@@ -125,15 +126,54 @@ class EdulintConfigPage(ConfigurationPage):
             get_workbench().set_option("assistance.use_pylint", False)
 
 
+def check_current_script():
+    editor = get_workbench().get_editor_notebook().get_current_editor()
+    if not editor:
+        return
+
+    if not editor.get_filename():
+        return
+
+    filename = editor.save_file()
+    if not filename:
+        # user has cancelled file saving
+        return
+
+    get_workbench().event_generate(
+        "ToplevelResponse",
+        filename=filename,
+    )
+
+
 def load_plugin():
     """Adds the edulint analyzer"""
-    get_workbench().add_view(EduLintView, tr("EduLint"), "se", visible_by_default=False)
+    get_workbench().add_view(EduLintView, "EduLint", "se", visible_by_default=False)
     add_program_analyzer(EdulintAnalyzer)
 
-    get_workbench().add_configuration_page("edulint", "Edulint", EdulintConfigPage, 81)
+    get_workbench().add_configuration_page("edulint", "EduLint", EdulintConfigPage, 81)
     get_workbench().set_default("edulint.enabled", True)
     get_workbench().set_default("edulint.open_edulint_on_warnings", False)
 
     if get_workbench().get_option("edulint.enabled"):
         get_workbench().set_default("assistance.use_pylint", False)
         get_workbench().set_option("assistance.use_pylint", False)
+
+    get_workbench().add_command(
+        "check_current_script",
+        "EduLint",
+        tr("Check with EduLint"),
+        caption=tr("Check with EduLint"),
+        handler=check_current_script,
+        default_sequence="<F9>",
+        group=0,
+        image=str(Path(__file__).parent / "broom-green.png"),
+        include_in_toolbar=not get_workbench().in_simple_mode(),
+        show_extra_sequences=True,
+    )
+    get_workbench().add_command(
+        "show_edulint_options",
+        "EduLint",
+        tr("EduLint Options..."),
+        lambda: get_workbench().show_options("edulint"),
+        group=180
+    )

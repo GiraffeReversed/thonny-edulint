@@ -158,6 +158,14 @@ def load_plugin():
         get_workbench().set_default("assistance.use_pylint", False)
         get_workbench().set_option("assistance.use_pylint", False)
 
+    def toggle_view_visibility(view_id):
+        visibility_flag = get_workbench().get_variable("view." + view_id + ".visible")
+
+        if visibility_flag.get():
+            get_workbench().hide_view(view_id)
+        else:
+            get_workbench().show_view(view_id)
+
     get_workbench().add_command(
         "check_current_script",
         "EduLint",
@@ -168,6 +176,14 @@ def load_plugin():
         group=0,
         image=str(Path(__file__).parent / "broom-green.png"),
         include_in_toolbar=not get_workbench().in_simple_mode(),
+    )
+    get_workbench().add_command(
+        "view_edulint_tab",
+        "EduLint",
+        tr("View EduLint tab"),
+        handler=lambda: toggle_view_visibility("EduLintView"),
+        flag_name="view.EduLintView.visible",
+        group=1,
     )
     get_workbench().add_command(
         "show_edulint_options",

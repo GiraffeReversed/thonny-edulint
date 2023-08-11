@@ -168,7 +168,6 @@ def load_plugin():
         group=0,
         image=str(Path(__file__).parent / "broom-green.png"),
         include_in_toolbar=not get_workbench().in_simple_mode(),
-        show_extra_sequences=True,
     )
     get_workbench().add_command(
         "show_edulint_options",

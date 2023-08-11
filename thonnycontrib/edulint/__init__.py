@@ -144,6 +144,8 @@ def check_current_script():
         filename=filename,
     )
 
+    get_workbench().show_view("EduLintView")
+
 
 def load_plugin():
     """Adds the edulint analyzer"""

@@ -25,5 +25,5 @@ setuptools.setup(
     },
     install_requires=["thonny >= 3.0.0", "edulint >= 2.6.5", "m2r2", "Pygments"],
     python_requires=">=3.7",
-    package_data={"*": ["thonnycontrib/edulint/broom-green.png"]}
+    package_data={"thonnycontrib.edulint": ["broom-green.png"]}
 )

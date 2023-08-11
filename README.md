@@ -21,6 +21,21 @@ To install directly from Thonny:
 
 After installing you will need to restart Thonny.
 
+### Known issues
+
+Due to bug in Thonny 4.0.0 to 4.1.1 there are two steps required to install `thonny-edulint`.
+
+1. Thonny -> Tools -> Manage plug-ins... -> thonny-edulint -> Install
+2. Thonny -> Tools -> Manage packages... -> edulint -> Install
+
+If you forget the second step, the code linting will fail and give you a message reminding you that it's necessary.
+
+The bug should be fixed in Thonny 4.1.2, after which this workaround shouldn't be necessary. More info is in [this issue](https://github.com/GiraffeReversed/thonny-edulint/issues/2) and the one referred from it.
+
+## Screenshot demo
+
+![Thonny edulint](docs/edulint-demo.png)
+
 
 ## License information
 

@@ -17,6 +17,10 @@ import edulint
 import m2r2
 
 
+class LintingError(Exception):
+    pass
+
+
 class EdulintAnalyzer(SubprocessProgramAnalyzer):
     """The analyzer itself"""
 
@@ -40,9 +44,18 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         """Parses the edulint output and sends it to thonny"""
 
         for error in err_lines:
-            logging.getLogger("thonny").error("Edulint: %s", error)
+            logging.getLogger("EduLint").error(error)
 
-        edulint_findings = json.loads("\n".join(out_lines))
+        out = "".join(out_lines)
+        try:
+            edulint_findings = json.loads(out)
+        except json.decoder.JSONDecodeError:
+            logging.getLogger("EduLint").error("failed to parse output:\n%s\n", out)
+            raise LintingError(
+                "Unable to decode results of linting. "
+                "Try installing edulint as a package: "
+                "Tools -> Manage packages... -> search edulint -> Install"
+            ) from None
 
         warnings = []
         for edulint_finding in edulint_findings:

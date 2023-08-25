@@ -1,0 +1,4 @@
+thonny >= 3.0.0
+edulint >= 2.6.5
+m2r2
+Pygments

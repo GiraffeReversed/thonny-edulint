@@ -66,13 +66,12 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
 
     @classmethod
     def _edulint_finding_to_thonny_format(cls, edulint_finding):
-        text_headline = edulint_finding["text"]
         text_explanation = cls._get_single_edulint_explanation_in_rst(edulint_finding["code"])
 
         atts = {}
         atts["explanation_rst"] = text_explanation
         # note that this cut outs after first newline https://github.com/thonny/thonny/issues/1186
-        atts["msg"] = text_headline
+        atts["msg"] = edulint_finding["text"]
 
         atts["filename"] = edulint_finding["path"]
 
@@ -87,6 +86,7 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         # remaining from edulint JSON: source, code, symbol
         # remaining in thonny dict: more_info_url
         atts["code"] = edulint_finding["code"]
+        atts["enabled_by"] = edulint_finding["enabled_by"]
 
         return atts
 

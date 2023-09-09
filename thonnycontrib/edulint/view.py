@@ -194,6 +194,20 @@ class EduLintView(tktextext.TextFrame):
 
             rst += "\n"
 
+            if len(file_warnings) > 0:
+                rst += "Summary: "
+                enabler_counts = {
+                    enabler: len([w for w in file_warnings if w["enabled_by"] == enabler])
+                    for enabler in sorted(set(
+                        w["enabled_by"] for w in file_warnings
+                    ))
+                }
+                rst += ", ".join(
+                    f"{enabler if enabler is not None else 'undetermined origin'}: {count}"
+                    for enabler, count in enabler_counts.items()
+                )
+                rst += "\n"
+
         self.text.append_rst(rst)
 
         # save snapshot
@@ -204,7 +218,9 @@ class EduLintView(tktextext.TextFrame):
             get_workbench().show_view("EduLintView")
 
     def _format_warning(self, warning, last):
-        title = rst_utils.escape(warning["msg"].splitlines()[0])
+        prepared_enabler = f"[{warning['enabled_by']}] " if warning["enabled_by"] is not None else ""
+        prepared_msg = warning["msg"].splitlines()[0]
+        title = rst_utils.escape(prepared_enabler + prepared_msg)
         if warning.get("lineno") is not None:
             url = self._format_file_url(warning)
             if warning.get("lineno"):

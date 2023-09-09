@@ -4,7 +4,7 @@ import logging
 import subprocess
 import sys
 import json
-from functools import lru_cache
+from functools import lru_cache, partial
 from typing import Dict
 from pathlib import Path
 
@@ -37,10 +37,10 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
-            on_completion=self._parse_and_output_warnings,
+            on_completion=partial(self._parse_and_output_warnings, main_file_path),
         )
 
-    def _parse_and_output_warnings(self, _, out_lines, err_lines):
+    def _parse_and_output_warnings(self, main_file_path, _, out_lines, err_lines):
         """Parses the edulint output and sends it to thonny"""
 
         for error in err_lines:
@@ -48,9 +48,10 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
 
         out = "".join(out_lines)
         try:
-            edulint_findings = json.loads(out)
-        except json.decoder.JSONDecodeError:
+            edulint_result = json.loads(out)
+        except json.decoder.JSONDecodeError as e:
             logging.getLogger("EduLint").error("failed to parse output:\n%s\n", out)
+            logging.getLogger("EduLint").error(e)
             raise LintingError(
                 "Unable to decode results of linting. "
                 "Try installing edulint as a package: "
@@ -58,11 +59,16 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
             ) from None
 
         warnings = []
-        for edulint_finding in edulint_findings:
+        for edulint_finding in edulint_result["problems"]:
             thonny_finding = self._edulint_finding_to_thonny_format(edulint_finding)
             warnings.append(thonny_finding)
 
-        self.completion_handler(self, warnings)
+        if len(edulint_result["configs"]) != 1 or edulint_result["configs"][0][0][0] != main_file_path:
+            config = None
+        else:
+            config = edulint_result["configs"][0][1]["config"]
+
+        self.completion_handler(self, warnings, config)
 
     @classmethod
     def _edulint_finding_to_thonny_format(cls, edulint_finding):

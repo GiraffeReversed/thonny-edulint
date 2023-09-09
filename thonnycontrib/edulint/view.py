@@ -91,7 +91,7 @@ class EduLintView(tktextext.TextFrame):
             )
         else:
             self.main_file_path = None
-            self._present_conclusion()
+            self._present_conclusion(None)
 
     def _append_text(self, chars, tags=()):
         self.text.direct_insert("end", chars, tags=tags)
@@ -128,16 +128,16 @@ class EduLintView(tktextext.TextFrame):
         if get_workbench().get_option("edulint.open_edulint_on_warnings"):
             get_workbench().show_view("EduLintView")
 
-    def _accept_warnings(self, analyzer, warnings):
+    def _accept_warnings(self, analyzer, warnings, config):
         if analyzer.cancelled:
             return
 
         self._accepted_warning_sets.append(warnings)
         if len(self._accepted_warning_sets) == len(self._analyzer_instances):
             self._present_warnings()
-            self._present_conclusion()
+            self._present_conclusion(config)
 
-    def _present_conclusion(self):
+    def _present_conclusion(self, config):
         if not self.text.get("1.0", "end").strip():
             if self.main_file_path is not None and os.path.exists(self.main_file_path):
                 self._append_text("\n")
@@ -157,6 +157,9 @@ class EduLintView(tktextext.TextFrame):
 
         if ASK_FEEDBACK and self.text.get("1.0", "end").strip():
             self._append_feedback_link()
+
+        if config is not None:
+            self.text.append_rst(f":remark:`used configuration: {config}`")
 
     def _present_warnings(self):
         warnings = [w for ws in self._accepted_warning_sets for w in ws]
@@ -206,7 +209,7 @@ class EduLintView(tktextext.TextFrame):
                     f"{enabler if enabler is not None else 'undetermined origin'}: {count}"
                     for enabler, count in enabler_counts.items()
                 )
-                rst += "\n"
+                rst += "\n\n"
 
         self.text.append_rst(rst)
 

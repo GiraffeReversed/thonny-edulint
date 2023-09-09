@@ -1,0 +1,216 @@
+default-enabler-name = "error"
+ignore-infile-config-for = ["pylint", "flake8"]
+disallowed-builtin-names = [
+    "min",
+    "max",
+    "sum",
+    "list",
+    "len",
+    "set",
+    "range",
+    "float",
+    "tuple",
+]
+set-groups = "warning"
+
+[pylint]
+enable = [
+    "superfluous-parens",
+    "redefined-builtin",
+    "use-foreach",
+    "simplifiable-if-return",
+    "inconsistent-return-statements",
+    "use-early-return",
+    "use-for-loop",
+    "duplicate-if-branches",
+    "redefined-outer-name",
+    "no-is-bool",
+    "no-else-break",
+    "redundant-elif",
+    "no-else-continue",
+    "redundant-arithmetic",
+    "import-outside-toplevel",
+    "use-dict-literal",
+    "unreachable",
+    "duplicate-value",
+    "use-append",
+    "unnecessary-pass",
+    "use-literal-letter",
+    "pointless-string-statement",
+    "use-ord-letter",
+    "simplifiable-if-expr",
+    "simplifiable-if-pass",
+    "no-loop-else",
+    "use-list-literal",
+    "redefined-argument-from-local",
+    "pointless-statement",
+    "no-while-true",
+    "simplifiable-if-assignment",
+    "attribute-defined-outside-init",
+    "loop-shadows-control-variable",
+    "unneeded-not",
+    "changing-control-variable",
+    "self-assigning-variable",
+    "dangerous-default-value",
+    "use-implicit-booleaness-not-len",
+    "unnecessary-dunder-call",
+    "unnecessary-dict-index-lookup",
+    "unidiomatic-typecheck",
+    "comparison-of-constants",
+    "use-tighter-boundaries",
+    "comparison-with-itself",
+    "at-most-one-iteration-for-loop",
+    "simplifiable-condition",
+    "trailing-comma-tuple",
+    "condition-evals-to-constant",
+    "unreachable-else",
+    "non-ascii-name",
+    "no-self-argument",
+    "comparison-with-callable",
+    "unnecessary-semicolon",
+    "for-target-subscript",
+    "function-redefined",
+    "missing-parentheses-for-call-in-test",
+    "method-hidden",
+    "reimported",
+    "duplicate-key",
+]
+
+[flake8]
+select = [
+    "W293", # blank line contains whitespace
+    "E302", # expected 2 blank lines, found 0
+    "E303", # too many blank lines (3)
+    "E501", # line too long (82 > 79 characters)
+    "F401", # module imported but unused
+    "W291", # trailing whitespace
+    "E231", # missing whitespace after ‘,’, ‘;’, or ‘:’
+    "F841", # local variable name is assigned to but never used
+    "E225", # missing whitespace around operator
+    "E265", # block comment should start with ‘# ‘
+    "E305", # expected 2 blank lines after end of function or class
+    "E211", # whitespace before ‘(’
+    "E999", # Syntax error
+    "E117", # over-indented
+    "E203", # whitespace before ‘:’
+    "F821", # undefined name name
+    "E301", # expected 1 blank line, found 0
+    "E111", # indentation is not a multiple of four
+    "E112", # expected an indented block
+    "E741", # do not use variables named ‘l’, ‘O’, or ‘I’
+    "E261", # at least two spaces before inline comment
+    "E712", # comparison to True should be ‘if cond is True:’ or ‘if cond:’
+    "E228", # missing whitespace around modulo operator
+    "W391", # blank line at end of file
+    "E128", # continuation line under-indented for visual indent
+    "E221", # multiple spaces before operator
+    "E202", # whitespace before ‘)’
+    "E271", # multiple spaces after keyword
+    "E711", # comparison to None should be ‘if cond is None:’
+    "E222", # multiple spaces after operator
+    "E127", # continuation line over-indented for visual indent
+    "E262", # inline comment should start with ‘# ‘
+    "E115", # expected an indented block (comment)
+    "E125", # continuation line with same indent as next logical line
+    "E502", # the backslash is redundant between brackets
+    "E201", # whitespace after ‘(’
+    "W191", # indentation contains tabs
+    "E701", # multiple statements on one line (colon)
+    "E101", # indentation contains mixed spaces and tabs
+    "E114", # indentation is not a multiple of four (comment)
+    "E113", # unexpected indentation
+    "E116", # unexpected indentation (comment)
+    "E266", # too many leading ‘#’ for block comment
+    "E272", # multiple spaces before keyword
+    "E129", # visually indented line with same indent as next logical line
+    "E703", # statement ends with a semicolon
+    "E713", # test for membership should be ‘not in’
+    "E902", # IOError
+    "W605", # invalid escape sequence ‘x’
+    "E122", # continuation line missing indentation or outdented
+    "F403", # ‘from module import *’ used; unable to detect undefined names
+    "F811", # redefinition of unused name from line N
+    "E227", # missing whitespace around bitwise or shift operator
+    "E402", # module level import not at top of file
+    "F405", # name may be undefined, or defined from star imports: module
+    "E251", # unexpected spaces around keyword / parameter equals
+    "E306", # expected 1 blank line before a nested definition
+    "E722", # do not use bare except, specify exception instead
+    "E131", # continuation line unaligned for hanging indent
+    "E124", # closing bracket does not match visual indentation
+    "E252", # missing whitespace around parameter equals
+    "F541", # f-string without any placeholders
+    "F601", # dictionary key name repeated with different values
+    "F632", # use ==/!= to compare str, bytes, and int literals
+    "F823", # local variable name … referenced before assignment
+    "E223", # tab before operator
+    "E224", # tab after operator
+    "E273", # tab after keyword
+    "E274", # tab before keyword
+    "E275", # missing whitespace after keyword
+    "E304", # blank lines found after function decorator
+    "E401", # multiple imports on one line
+    "E702", # multiple statements on one line (semicolon)
+    "E714", # test for object identity should be ‘is not’
+    "E721", # do not compare types, use ‘isinstance()’
+    "E731", # do not assign a lambda expression, use a def
+    "E742", # do not define classes named ‘l’, ‘O’, or ‘I’
+    "E743", # do not define functions named ‘l’, ‘O’, or ‘I’
+    "E901", # SyntaxError or IndentationError
+    "F402", # import module from line N shadowed by loop variable
+    "F404", # future import(s) name after other statements
+    "F406", # ‘from module import *’ only allowed at module level
+    "F407", # an undefined __future__ feature name was imported
+    "F501", # invalid % format literal
+    "F502", # % format expected mapping but got sequence
+    "F503", # % format expected sequence but got mapping
+    "F504", # % format unused named arguments
+    "F505", # % format missing named arguments
+    "F506", # % format mixed positional and named arguments
+    "F507", # % format mismatch of placeholder and argument count
+    "F508", # % format with * specifier requires a sequence
+    "F509", # % format with unsupported format character
+    "F521", # .format(...) invalid format string
+    "F522", # .format(...) unused named arguments
+    "F523", # .format(...) unused positional arguments
+    "F524", # .format(...) missing argument
+    "F525", # .format(...) mixing automatic and manual numbering
+    "F602", # dictionary key variable name repeated with different values
+    "F621", # too many expressions in an assignment with star-unpacking
+    "F622", # two or more starred expressions in an assignment (a, *b, *c = d)
+    "F631", # assertion test is a tuple, which is always True
+    "F633", # use of >> is invalid with print function
+    "F634", # if test is a tuple, which is always True
+    "F701", # a break statement outside of a while or for loop
+    "F702", # a continue statement outside of a while or for loop
+    "F703", # a continue statement in a finally block in a loop
+    "F704", # a yield or yield from statement outside of a function
+    "F705", # a return statement with arguments inside a generator
+    "F706", # a return statement outside of a function/method
+    "F707", # an except: block as not the last exception handler
+    "F721", # syntax error in doctest
+    "F722", # syntax error in forward annotation
+    "F723", # syntax error in type comment
+    "F822", # undefined name name in __all__
+    "F831", # duplicate argument name in function definition
+    "F901", # raise NotImplemented should be raise NotImplementedError
+    "W601", # .has_key() is deprecated, use ‘in’
+    "W602", # deprecated form of raising exception
+    "W603", # ‘<>’ is deprecated, use ‘!=’
+    "W604", # backticks are deprecated, use ‘repr()’
+    "W606", # ‘async’ and ‘await’ are reserved keywords starting with Python 3.7
+]
+
+[translations.warning.pylint]
+enable = [
+    "use-enumerate",
+    "use-augmented-assign",
+    "simplifiable-if-nested",
+    "unused-argument",
+    "simplifiable-if-seq",
+    "chained-comparison",
+    "modifying-iterated-structure",
+    "consider-using-max-builtin",
+    "consider-using-min-builtin",
+    "consider-using-get",
+]

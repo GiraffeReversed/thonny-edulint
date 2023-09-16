@@ -140,6 +140,12 @@ class EdulintConfigPage(ConfigurationPage):
             row=3,
             columnspan=2,
         )
+        self.add_checkbox(
+            "edulint.disable_version_check",
+            tr("Disable checks for a new version."),
+            row=4,
+            columnspan=2,
+        )
 
     def apply(self):
         if get_workbench().get_option("edulint.enabled"):
@@ -175,6 +181,7 @@ def load_plugin():
     get_workbench().add_configuration_page("edulint", "EduLint", EdulintConfigPage, 81)
     get_workbench().set_default("edulint.enabled", True)
     get_workbench().set_default("edulint.open_edulint_on_warnings", False)
+    get_workbench().set_default("edulint.disable_version_check", False)
 
     if get_workbench().get_option("edulint.enabled"):
         get_workbench().set_default("assistance.use_pylint", False)

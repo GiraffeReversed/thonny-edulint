@@ -13,6 +13,9 @@ from thonnycontrib.edulint.version_checker import PackageInfoManager, update_awa
 logger = getLogger(__name__)
 
 def check_updates_with_notification(ttl: int = 600, open_window_always: bool = False):
+    if get_workbench().get_option("edulint.disable_version_check", default=False) and not open_window_always:
+        return
+
     is_update_waiting = update_awaiting(ttl)
     # print("---------------", is_update_waiting)
     if is_update_waiting or open_window_always:

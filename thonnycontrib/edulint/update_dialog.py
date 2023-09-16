@@ -54,8 +54,8 @@ class UpdateDialog(CommonDialog):
             return
 
         no_updates = "There are currently no updates available, you have the newest versions.\n"
-        update_for_edulint = "New version of EduLint is available. You can update: Main menu -> Tools -> Manage packages... -> search for EduLint -> click Upgrade.\n"
-        update_for_thonny_edulint = "New version of Thonny-EduLint is available. You can update: Main menu -> Tools -> Manage plug-ins... -> search for Thonny-EduLint -> click Upgrade.\n"
+        update_for_edulint = "New version of EduLint is available. You can update: Main menu -> Tools -> Manage packages... -> search for EduLint -> click Upgrade. You then have to restart Thonny.\n"
+        update_for_thonny_edulint = "New version of Thonny-EduLint is available. You can update: Main menu -> Tools -> Manage plug-ins... -> search for Thonny-EduLint -> click Upgrade. You then have to restart Thonny.\n"
         current_state = f"""\nCurrent state:
 Package name: installed version -> latest version online
 EduLint: {edulint_local_version} -> {edulint_latest_version}

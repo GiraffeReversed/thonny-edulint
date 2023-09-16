@@ -57,12 +57,11 @@ class UpdateDialog(CommonDialog):
             return
 
         no_updates = "There are currently no updates available, you have the newest versions.\n"
-        update_for_edulint = "New version of EduLint is available. You can update: Main menu -> Tools -> Manage packages... -> search for EduLint -> click Upgrade. You then have to restart Thonny.\n"
-        update_for_thonny_edulint = "New version of Thonny-EduLint is available. You can update: Main menu -> Tools -> Manage plug-ins... -> search for Thonny-EduLint -> click Upgrade. You then have to restart Thonny.\n"
+        update_for_edulint = "New version of EduLint is available.\nYou can update it through: Main menu -> Tools -> Manage packages... -> search for EduLint -> click Upgrade. After that, you have to restart Thonny.\n\n"
+        update_for_thonny_edulint = "New version of Thonny-EduLint is available.\nYou can update it through: Main menu -> Tools -> Manage plug-ins... -> search for Thonny-EduLint -> click Upgrade. After that, you have to restart Thonny.\n\n"
         current_state = f"""\nCurrent state:
-Package name: installed version -> latest version online
-EduLint: {edulint_local_version} -> {edulint_latest_version}
-Thonny-EduLint: {thonny_edulint_local_version} -> {thonny_edulint_latest_version}"""
+EduLint: installed version = {edulint_local_version}; newest version = {edulint_latest_version}
+Thonny-EduLint: installed version = {thonny_edulint_local_version}; newest version = {thonny_edulint_latest_version}"""
 
         intro_label = ttk.Label(
             main_frame,

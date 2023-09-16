@@ -34,7 +34,7 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         python_executable_path = sys.executable
 
         self._proc = ui_utils.popen_with_ui_thread_callback(
-            [python_executable_path, "-m", "edulint", "--json", main_file_path],
+            [python_executable_path, "-m", "edulint", "--disable-version-check", "--json", main_file_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,

@@ -12,6 +12,7 @@ from thonny import get_workbench, ui_utils
 from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
 from thonnycontrib.edulint.view import EduLintView, SubprocessProgramAnalyzer, add_program_analyzer
+from thonnycontrib.edulint.update_dialog import check_updates_with_notification
 
 import edulint
 import m2r2
@@ -212,4 +213,11 @@ def load_plugin():
         tr("EduLint Options..."),
         lambda: get_workbench().show_options("edulint"),
         group=180
+    )
+    get_workbench().add_command(
+        "show_update_window",
+        "EduLint",
+        tr("Check for updates"),
+        lambda: partial(check_updates_with_notification, ttl = 0, open_window_always = True)(),
+        group=200
     )

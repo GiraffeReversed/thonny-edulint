@@ -32,24 +32,42 @@ class UpdateDialog(CommonDialog):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-        self.title("EduLint Update Window")
+        self.title("Thonny-EduLint - version check")
 
         padx = 15
 
-        # TODO: Try catch
-        edulint_local_version = PackageInfoManager.get_local_module_version("edulint")
-        thonny_edulint_local_version = PackageInfoManager.get_local_module_version("thonny-edulint")
+        try:
+            edulint_is_outdated = PackageInfoManager.is_update_waiting("edulint")
+            edulint_local_version = PackageInfoManager.get_local_module_version("edulint")
+            edulint_latest_version = PackageInfoManager.get_latest_version("edulint")
 
-        edulint_latest_version = PackageInfoManager.get_latest_version("edulint")
-        thonny_edulint_latest_version = PackageInfoManager.get_local_module_version("thonny-edulint")
+            thonny_edulint_is_outdated = PackageInfoManager.is_update_waiting("thonny-edulint")
+            thonny_edulint_local_version = PackageInfoManager.get_local_module_version("thonny-edulint")
+            thonny_edulint_latest_version = PackageInfoManager.get_local_module_version("thonny-edulint")
+            
+        except:
+            error_label = ttk.Label(
+                main_frame,
+                text=f"An error occured while checking for current and latest version. Maybe you're not connected to Internet?",
+            )
+            error_label.grid(row=1, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 15))
+            return
 
+        no_updates = "There are currently no updates available, you have the newest versions.\n"
+        update_for_edulint = "New version of EduLint is available. You can update: Main menu -> Tools -> Manage packages... -> search for EduLint -> click Upgrade.\n"
+        update_for_thonny_edulint = "New version of Thonny-EduLint is available. You can update: Main menu -> Tools -> Manage plug-ins... -> search for Thonny-EduLint -> click Upgrade.\n"
+        current_state = f"""\nCurrent state:
+Package name: installed version -> latest version online
+EduLint: {edulint_local_version} -> {edulint_latest_version}
+Thonny-EduLint: {thonny_edulint_local_version} -> {thonny_edulint_latest_version}"""
 
         intro_label = ttk.Label(
             main_frame,
-            text=f"""
-EduLint: {edulint_local_version} -> {edulint_latest_version}
-Thonny-EduLint: {thonny_edulint_local_version} -> {thonny_edulint_latest_version}
-            """,
+            text= "" +
+                (no_updates if not (thonny_edulint_is_outdated or edulint_is_outdated) else "") +
+                (update_for_thonny_edulint if thonny_edulint_is_outdated  else "") +
+                (update_for_edulint if edulint_is_outdated  else "") +
+                current_state,
             wraplength=550,
             # width=100
         )

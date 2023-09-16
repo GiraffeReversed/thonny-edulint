@@ -2,3 +2,4 @@ thonny >= 3.0.0
 edulint >= 3.0.0
 m2r2
 Pygments
+requests

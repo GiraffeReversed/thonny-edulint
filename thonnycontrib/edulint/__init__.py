@@ -7,12 +7,13 @@ import json
 from functools import lru_cache, partial
 from typing import Dict
 from pathlib import Path
+from threading import Thread
 
 from thonny import get_workbench, ui_utils
 from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
 from thonnycontrib.edulint.view import EduLintView, SubprocessProgramAnalyzer, add_program_analyzer
-from thonnycontrib.edulint.update_dialog import check_updates_with_notification
+from thonnycontrib.edulint.update_dialog import check_updates_with_notification, UpdateDialog
 
 import edulint
 import m2r2
@@ -228,3 +229,7 @@ def load_plugin():
         lambda: partial(check_updates_with_notification, ttl = 0, open_window_always = True)(),
         group=200
     )
+
+    # Always use <<event>> for call that may come from threads. Tkinter ensures it runs on main thread. Thonny's custom implementation (i.e. without <<event>>) doesn't and it may get  processed on non-main thread.
+    get_workbench().bind("<<EduLintOpenUpdateWindow>>", lambda _: ui_utils.show_dialog(UpdateDialog(get_workbench())), add=True)  
+    Thread(target=check_updates_with_notification).start() # note: might want to call this only after event WorkbenchReady

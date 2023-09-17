@@ -1,9 +1,7 @@
 from logging import getLogger
 from typing import Dict
-from threading import Thread
 
-import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import ttk
 
 from thonny import get_workbench, ui_utils
 from thonny.ui_utils import CommonDialog
@@ -17,14 +15,8 @@ def check_updates_with_notification(ttl: int = 600, open_window_always: bool = F
         return
 
     is_update_waiting = update_awaiting(ttl)
-    # print("---------------", is_update_waiting)
     if is_update_waiting or open_window_always:
-        ui_utils.show_dialog(UpdateDialog(get_workbench()))
-
-
-async_check_for_update = Thread(target=check_updates_with_notification)
-async_check_for_update.start()
-
+        get_workbench().event_generate("<<EduLintOpenUpdateWindow>>", when="tail")
 
 
 class UpdateDialog(CommonDialog):
@@ -46,8 +38,7 @@ class UpdateDialog(CommonDialog):
 
             thonny_edulint_is_outdated = PackageInfoManager.is_update_waiting("thonny-edulint")
             thonny_edulint_local_version = PackageInfoManager.get_local_module_version("thonny-edulint")
-            thonny_edulint_latest_version = PackageInfoManager.get_local_module_version("thonny-edulint")
-            
+            thonny_edulint_latest_version = PackageInfoManager.get_latest_version("thonny-edulint")
         except:
             error_label = ttk.Label(
                 main_frame,

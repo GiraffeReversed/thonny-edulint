@@ -91,7 +91,7 @@ class EduLintView(tktextext.TextFrame):
             )
         else:
             self.main_file_path = None
-            self._present_conclusion(None)
+            self._present_conclusion(None, [])
 
     def _append_text(self, chars, tags=()):
         self.text.direct_insert("end", chars, tags=tags)
@@ -134,35 +134,47 @@ class EduLintView(tktextext.TextFrame):
 
         self._accepted_warning_sets.append(warnings)
         if len(self._accepted_warning_sets) == len(self._analyzer_instances):
-            self._present_warnings()
-            self._present_conclusion(config)
+            warnings = [w for ws in self._accepted_warning_sets for w in ws]
+            self._present_warnings(warnings)
+            self._present_conclusion(config, warnings)
 
-    def _present_conclusion(self, config):
-        if not self.text.get("1.0", "end").strip():
-            if self.main_file_path is not None and os.path.exists(self.main_file_path):
-                self._append_text("\n")
+    def _present_summary(self, warnings):
+        self._append_text("\n")
+        rst = "Summary: "
+        if len(warnings) == 0:
+            return rst + "no problems detected"
+
+        enabler_counts = {
+            enabler: len([w for w in warnings if w["enabled_by"] == enabler])
+            for enabler in sorted(set(
+                w["enabled_by"] for w in warnings
+            ))
+        }
+        rst += ", ".join(
+            f"{enabler if enabler is not None else 'undetermined origin'}: {count}"
+            for enabler, count in enabler_counts.items()
+        )
+        rst += "\n\n"
+        return rst
+
+    def _present_conclusion(self, config, warnings):
+        if self.main_file_path is not None and os.path.exists(self.main_file_path):
+            self.text.append_rst(self._present_summary(warnings))
+
+            if config is not None:
+                self.text.append_rst(f"used configuration: {config}", ("em",))
+
+            if len(warnings) == 0:
                 self.text.append_rst(
-                    "The code in `%s <%s>`__ looks good.\n\n"
-                    % (
-                        os.path.basename(self.main_file_path),
-                        self._format_file_url({"filename": self.main_file_path}),
-                    )
-                )
-                self.text.append_rst(
-                    "If it is not working as it should, "
+                    "If the code is not working as it should, "
                     + "then consider using some general "
                     + "`debugging techniques <debugging.rst>`__.\n\n",
-                    ("em",),
                 )
 
-        if ASK_FEEDBACK and self.text.get("1.0", "end").strip():
+        if ASK_FEEDBACK and len(warnings) > 0:
             self._append_feedback_link()
 
-        if config is not None:
-            self.text.append_rst(f":remark:`used configuration: {config}`")
-
-    def _present_warnings(self):
-        warnings = [w for ws in self._accepted_warning_sets for w in ws]
+    def _present_warnings(self, warnings):
         self.text.direct_delete("end-2l linestart", "end-1c lineend")
 
         if not warnings:
@@ -196,20 +208,6 @@ class EduLintView(tktextext.TextFrame):
                 rst += self._format_warning(warning, i == len(file_warnings) - 1) + "\n"
 
             rst += "\n"
-
-            if len(file_warnings) > 0:
-                rst += "Summary: "
-                enabler_counts = {
-                    enabler: len([w for w in file_warnings if w["enabled_by"] == enabler])
-                    for enabler in sorted(set(
-                        w["enabled_by"] for w in file_warnings
-                    ))
-                }
-                rst += ", ".join(
-                    f"{enabler if enabler is not None else 'undetermined origin'}: {count}"
-                    for enabler, count in enabler_counts.items()
-                )
-                rst += "\n\n"
 
         self.text.append_rst(rst)
 

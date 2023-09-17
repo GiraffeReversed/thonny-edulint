@@ -1,14 +1,14 @@
 from logging import getLogger
-from typing import Dict
 
 from tkinter import ttk
 
-from thonny import get_workbench, ui_utils
+from thonny import get_workbench
 from thonny.ui_utils import CommonDialog
 
 from thonnycontrib.edulint.version_checker import PackageInfoManager, update_awaiting
 
 logger = getLogger(__name__)
+
 
 def check_updates_with_notification(ttl: int = 600, open_window_always: bool = False):
     if get_workbench().get_option("edulint.disable_version_check", default=False) and not open_window_always:
@@ -39,33 +39,37 @@ class UpdateDialog(CommonDialog):
             thonny_edulint_is_outdated = PackageInfoManager.is_update_waiting("thonny-edulint")
             thonny_edulint_local_version = PackageInfoManager.get_local_module_version("thonny-edulint")
             thonny_edulint_latest_version = PackageInfoManager.get_latest_version("thonny-edulint")
-        except:
+        except Exception:
             error_label = ttk.Label(
                 main_frame,
-                text=f"An error occured while checking for current and latest version. Maybe you're not connected to Internet?",
+                text="An error occurred while checking for current and latest version. Maybe you're "
+                     "not connected to Internet?",
             )
             error_label.grid(row=1, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 15))
             return
 
         no_updates = "There are currently no updates available, you have the newest versions.\n"
-        update_for_edulint = "New version of EduLint is available.\nYou can update it through: Main menu -> Tools -> Manage packages... -> search for EduLint -> click Upgrade. After that, you have to restart Thonny.\n\n"
-        update_for_thonny_edulint = "New version of Thonny-EduLint is available.\nYou can update it through: Main menu -> Tools -> Manage plug-ins... -> search for Thonny-EduLint -> click Upgrade. After that, you have to restart Thonny.\n\n"
+        update_for_edulint = "New version of EduLint is available.\nYou can update it through: " \
+                             "Main menu -> Tools -> Manage packages... -> search for EduLint -> click Upgrade. " \
+                             "After that, you have to restart Thonny.\n\n"
+        update_for_thonny_edulint = "New version of Thonny-EduLint is available.\nYou can update it through: " \
+                                    "Main menu -> Tools -> Manage plug-ins... -> search for Thonny-EduLint -> click " \
+                                    "Upgrade. After that, you have to restart Thonny.\n\n"
         current_state = f"""\nCurrent state:
 EduLint: installed version = {edulint_local_version}; newest version = {edulint_latest_version}
 Thonny-EduLint: installed version = {thonny_edulint_local_version}; newest version = {thonny_edulint_latest_version}"""
 
         intro_label = ttk.Label(
             main_frame,
-            text= "" +
-                (no_updates if not (thonny_edulint_is_outdated or edulint_is_outdated) else "") +
-                (update_for_thonny_edulint if thonny_edulint_is_outdated  else "") +
-                (update_for_edulint if edulint_is_outdated  else "") +
-                current_state,
+            text=(
+                (no_updates if not (thonny_edulint_is_outdated or edulint_is_outdated) else "")
+                + (update_for_edulint if edulint_is_outdated else "")
+                + (update_for_thonny_edulint if thonny_edulint_is_outdated else "")
+                + current_state
+            ),
             wraplength=550,
-            # width=100
         )
         intro_label.grid(row=1, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 15))
-
 
     def _close(self, event=None):
         self.destroy()

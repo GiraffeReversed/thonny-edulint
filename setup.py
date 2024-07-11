@@ -12,6 +12,7 @@ setuptools.setup(
     author="Anna Rechtackova",
     author_email="anna.rechtackova@mail.muni.cz",
     description="A plugin that adds EduLint warnings to the Thonny Python IDE.",
+    license="GPLv3",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=["thonnycontrib.edulint"],

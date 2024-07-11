@@ -23,7 +23,7 @@ After installing you will need to restart Thonny.
 
 ### Known issues
 
-Due to bug in Thonny 4.0.0 to 4.1.1 there are two steps required to install `thonny-edulint`.
+Due to bug in Thonny 4.0.0 to (at least) 4.1.4 there are two steps required to install `thonny-edulint`.
 
 1. Thonny -> Tools -> Manage plug-ins... -> thonny-edulint -> Install
 2. Thonny -> Tools -> Manage packages... -> edulint -> Install

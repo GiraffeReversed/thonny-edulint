@@ -7,8 +7,13 @@ from logging import getLogger
 from typing import List
 
 from thonny import get_runner, get_workbench, rst_utils, tktextext, ui_utils
-from thonny.common import STRING_PSEUDO_FILENAME, ToplevelResponse, read_source
+from thonny.common import ToplevelResponse, read_source
 from thonny.ui_utils import scrollbar_style
+
+try:
+    from thonny.common import STRING_PSEUDO_FILENAME  # Introduced in Thonny 4.0.0 https://github.com/thonny/thonny/commit/c731f0dddcebe4e6d377f5524610fb8e5e06fafa
+except ImportError:
+    STRING_PSEUDO_FILENAME = "<string>"  # Workaround to hopefully also support Thonny < 4.0.0 
 
 from thonnycontrib.edulint.feedback_dialog import FeedbackDialog
 

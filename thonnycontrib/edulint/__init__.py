@@ -68,8 +68,7 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         if len(edulint_result["configs"]) != 1:
             config = None
         else:
-            # todo: How to trigger this? Maybe it was also impacted and is not fixed?
-            config = edulint_result["configs"][0][1]["config"]
+            config = edulint_result["configs"][0]
 
         self.completion_handler(self, warnings, config)
 

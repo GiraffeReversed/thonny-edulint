@@ -8,6 +8,9 @@ from functools import lru_cache, partial
 from typing import Dict
 from pathlib import Path
 from threading import Thread
+import traceback
+
+from tkinter import ttk
 
 from thonny import get_workbench, ui_utils
 from thonny.config_ui import ConfigurationPage
@@ -15,6 +18,7 @@ from thonny.languages import tr
 from thonnycontrib.edulint.view import EduLintView, SubprocessProgramAnalyzer, add_program_analyzer
 from thonnycontrib.edulint.update_dialog import check_updates_with_notification, UpdateDialog
 from thonnycontrib.edulint.edulint_unavailable_dialog import EdulintUnavailableDialog
+from thonnycontrib.edulint.reporting import get_reporting_user_id, send_code, send_results, send_errors
 
 import edulint
 import m2r2
@@ -35,6 +39,9 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         """Runs edulint on the currently open file."""
         python_executable_path = sys.executable
 
+        if get_workbench().get_option("edulint.enable_code_remote_reporting", default=False):
+            send_code(main_file_path)
+
         self._proc = ui_utils.popen_with_ui_thread_callback(
             [python_executable_path, "-m", "edulint", "check", "--disable-version-check", "--json", main_file_path],
             stdout=subprocess.PIPE,
@@ -49,12 +56,25 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         for error in err_lines:
             logging.getLogger("EduLint").error(error)
 
+        if get_workbench().get_option("edulint.enable_exception_remote_reporting", default=False):
+            err_str = "".join(err_lines) # TODO: can the join itself fail?
+            if err_str:
+                send_errors(main_file_path, err_str)  
+                # TODO: This is covering edulint errors, but not thonny edulint errors
+
         out = "".join(out_lines)
+        if get_workbench().get_option("edulint.enable_result_remote_reporting", default=False):
+            send_results(main_file_path, out)
+
         try:
             edulint_result = json.loads(out)
         except json.decoder.JSONDecodeError as e:
             logging.getLogger("EduLint").error("failed to parse output:\n%s\n", out)
             logging.getLogger("EduLint").error(e)
+
+            if get_workbench().get_option("edulint.enable_exception_remote_reporting", default=False):
+                send_errors(main_file_path, traceback.format_exc())
+        
             warnings = [{
                 "explanation_rst": "" 
                     "Unable to decode results of linting. Install edulint as a package:\n"
@@ -162,6 +182,48 @@ class EdulintConfigPage(ConfigurationPage):
             columnspan=2,
         )
 
+        empty_space = ttk.Label(self, text="")
+        empty_space.grid(row=5, columnspan=2, pady=20)
+
+        reporting_headline = ttk.Label(self, text=tr("Report to EduLint servers"), font="BoldTkDefaultFont")
+        reporting_headline.grid(row=6, columnspan=2)
+
+        reporting_intro = ttk.Label(self, text=tr("To futher improve EduLint and research code quality we need data about your usage of EduLint. Will you help us collect this anonymous data?"))
+        reporting_intro.grid(row=7, columnspan=2)
+
+        self.add_checkbox(
+            "edulint.enable_result_remote_reporting",
+            tr("Send the linting results, i.e. which issues appeared in you code."),
+            row=8,
+            columnspan=2,
+        )
+
+        self.add_checkbox(
+            "edulint.enable_code_remote_reporting",
+            tr("Send the code itself."),
+            row=9,
+            columnspan=2,
+        )
+        self.add_checkbox(
+            "edulint.enable_exception_remote_reporting",
+            tr("Send the logs for exceptions/errors."),
+            row=10,
+            columnspan=2,
+        )
+
+        reporting_outro = ttk.Label(self, text=tr(
+            "The data is used for the following purposes:\n"
+            " - Improvement of EduLint\n"
+            " - Academic research\n"
+            "\n"
+            "If you previously submitted some data and wish to remove them, send an email to anna.rechtackova@mail.muni.cz\n"
+            "with subject 'Thonny-Edulint Data Request'. In the body of the email include the following identifier:\n"
+            f"   {get_reporting_user_id()}"
+            ), justify="left", anchor="w"
+        )
+        reporting_outro.grid(row=11, columnspan=2, sticky = "W")
+
+
     def apply(self):
         if get_workbench().get_option("edulint.enabled"):
             get_workbench().set_option("assistance.use_pylint", False)
@@ -197,6 +259,9 @@ def load_plugin():
     get_workbench().set_default("edulint.enabled", True)
     get_workbench().set_default("edulint.open_edulint_on_warnings", False)
     get_workbench().set_default("edulint.disable_version_check", False)
+    get_workbench().set_default("edulint.enable_code_remote_reporting", False)
+    get_workbench().set_default("edulint.enable_result_remote_reporting", False)
+    get_workbench().set_default("edulint.enable_exception_remote_reporting", False)
 
     if get_workbench().get_option("edulint.enabled"):
         get_workbench().set_default("assistance.use_pylint", False)

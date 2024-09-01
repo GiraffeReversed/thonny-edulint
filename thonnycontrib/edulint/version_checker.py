@@ -102,7 +102,13 @@ class PackageInfoManager:
 
         latest_version = cls.get_latest_version(package_name, ttl)
         
-        return local_package_version != latest_version  # This presumes local version is never higher than pypi version
+        def versiontuple(v):
+            return tuple(map(int, (v.split("."))))
+
+        try:
+            return versiontuple(local_package_version) < versiontuple(latest_version)  # This works, unless we start using pre-releases or otherwise specific versions.
+        except Exception:
+            return local_package_version != latest_version  # Fallback
 
 
 def update_awaiting(ttl: int = 600) -> bool:

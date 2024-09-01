@@ -14,6 +14,7 @@ from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
 from thonnycontrib.edulint.view import EduLintView, SubprocessProgramAnalyzer, add_program_analyzer
 from thonnycontrib.edulint.update_dialog import check_updates_with_notification, UpdateDialog
+from thonnycontrib.edulint.edulint_unavailable_dialog import EdulintUnavailableDialog
 
 import edulint
 import m2r2
@@ -54,6 +55,19 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         except json.decoder.JSONDecodeError as e:
             logging.getLogger("EduLint").error("failed to parse output:\n%s\n", out)
             logging.getLogger("EduLint").error(e)
+            warnings = [{
+                "explanation_rst": "" 
+                    "Unable to decode results of linting. Install edulint as a package:\n"
+                    "  Tools -> Manage packages... -> search edulint -> Install",
+                "msg": "Linting failed. Check description with instructions how to fix it.",
+                "filename": "EMPTY",
+                "lineno": 1, 
+                "col_offset": 1,
+                "code": "X000",
+                "enabled_by": "thonny-edulint",
+            }]
+            get_workbench().event_generate("<<EduLintOpenEdulintUnavailableDialog>>", when="tail")
+            self.completion_handler(self, warnings, config=None)
             raise LintingError(
                 "Unable to decode results of linting. "
                 "Try installing edulint as a package: "
@@ -232,4 +246,5 @@ def load_plugin():
 
     # Always use <<event>> for call that may come from threads. Tkinter ensures it runs on main thread. Thonny's custom implementation (i.e. without <<event>>) doesn't and it may get  processed on non-main thread.
     get_workbench().bind("<<EduLintOpenUpdateWindow>>", lambda _: ui_utils.show_dialog(UpdateDialog(get_workbench())), add=True)  
+    get_workbench().bind("<<EduLintOpenEdulintUnavailableDialog>>", lambda _: ui_utils.show_dialog(EdulintUnavailableDialog(get_workbench())), add=True)  
     Thread(target=check_updates_with_notification).start() # note: might want to call this only after event WorkbenchReady

@@ -8,8 +8,57 @@ import threading
 from thonnycontrib.edulint.version_checker import PackageInfoManager
 from platformdirs import PlatformDirs
 import requests
+from tkinter import ttk
+
+from thonny import get_workbench
+from thonny.ui_utils import CommonDialog
+from thonny.languages import tr
 
 REPORTING_URL = 'https://edulint.com/api/reporting'
+
+class EdulintReportingFirstTimeDialog(CommonDialog):
+    def __init__(self, master):
+        super().__init__(master=master)
+        main_frame = ttk.Frame(self)
+        main_frame.grid(row=0, column=0, sticky="nsew")
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+
+        self.title("Thonny-EduLint - Will you help us?")
+
+        error_label = ttk.Label(
+            main_frame,
+            text="""To improve EduLint and research code quality we need data about your usage of EduLint.
+
+Will you help us collect this anonymous data?
+
+Clicking Yes will open settings dialog, where you can fine tune which things should be sent to us.
+
+Clicking No will keep settings of reporting as is (disabled by default). You can later enable it EduLints settings.
+""")
+        error_label.grid(row=1, column=0, columnspan=3, sticky="nw", padx=15, pady=(15, 15))
+
+        self._yes_button = ttk.Button(main_frame, text=tr("Yes"), command=self._yes)
+        self._yes_button.grid(row=2, column=0, sticky="ne", padx=15, pady=15)
+
+        self._no_button = ttk.Button(main_frame, text=tr("No"), command=self._no)
+        self._no_button.grid(row=2, column=1, sticky="ne", padx=15, pady=15)
+
+        self.bind("<Escape>", self._no, True)
+        self.bind("<Return>", self._yes, True)
+
+    def _yes(self, event=None):
+        get_workbench().set_option("edulint.enable_code_remote_reporting", True)
+        get_workbench().set_option("edulint.enable_result_remote_reporting", True)
+        get_workbench().set_option("edulint.enable_exception_remote_reporting", True)
+        get_workbench().show_options("edulint")
+        self._close()
+
+    def _no(self, event=None):
+        self._close()
+
+    def _close(self, event=None):
+        self.destroy()
 
 def str_to_sha256(text: str, digest_length: int = 20) -> str:
     return hashlib.sha256(str.encode(text)).hexdigest()[:digest_length]  # We don't need the whole hash

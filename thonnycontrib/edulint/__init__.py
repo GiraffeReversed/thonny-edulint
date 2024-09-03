@@ -18,7 +18,7 @@ from thonny.languages import tr
 from thonnycontrib.edulint.view import EduLintView, SubprocessProgramAnalyzer, add_program_analyzer
 from thonnycontrib.edulint.update_dialog import check_updates_with_notification, UpdateDialog
 from thonnycontrib.edulint.edulint_unavailable_dialog import EdulintUnavailableDialog
-from thonnycontrib.edulint.reporting import get_reporting_user_id, send_code, send_results, send_errors
+from thonnycontrib.edulint.reporting import get_reporting_user_id, send_code, send_results, send_errors, EdulintReportingFirstTimeDialog
 
 import edulint
 import m2r2
@@ -103,6 +103,13 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
             config = None
         else:
             config = edulint_result["configs"][0]
+
+        number_of_succesful_lints = get_workbench().get_option("assistance.number_of_successful_lints", 0) + 1
+        get_workbench().set_option("assistance.number_of_successful_lints", number_of_succesful_lints)   
+
+        if number_of_succesful_lints == 8 and get_workbench().get_option("assistance.has_user_seen_reporting_dialog", False) is False:
+            get_workbench().set_option("assistance.has_user_seen_reporting_dialog", True)
+            get_workbench().event_generate("<<EduLintOpenReportingFirstTimeDialog>>", when="tail")
 
         self.completion_handler(self, warnings, config)
 
@@ -263,6 +270,8 @@ def load_plugin():
     get_workbench().set_default("edulint.enable_code_remote_reporting", False)
     get_workbench().set_default("edulint.enable_result_remote_reporting", False)
     get_workbench().set_default("edulint.enable_exception_remote_reporting", False)
+    get_workbench().set_default("edulint.has_user_seen_reporting_dialog", False)
+    get_workbench().set_default("edulint.number_of_successful_lints", 0)
 
     if get_workbench().get_option("edulint.enabled"):
         get_workbench().set_default("assistance.use_pylint", False)
@@ -313,4 +322,5 @@ def load_plugin():
     # Always use <<event>> for call that may come from threads. Tkinter ensures it runs on main thread. Thonny's custom implementation (i.e. without <<event>>) doesn't and it may get  processed on non-main thread.
     get_workbench().bind("<<EduLintOpenUpdateWindow>>", lambda _: ui_utils.show_dialog(UpdateDialog(get_workbench())), add=True)  
     get_workbench().bind("<<EduLintOpenEdulintUnavailableDialog>>", lambda _: ui_utils.show_dialog(EdulintUnavailableDialog(get_workbench())), add=True)  
+    get_workbench().bind("<<EduLintOpenReportingFirstTimeDialog>>", lambda _: ui_utils.show_dialog(EdulintReportingFirstTimeDialog(get_workbench())), add=True)
     Thread(target=check_updates_with_notification).start() # note: might want to call this only after event WorkbenchReady

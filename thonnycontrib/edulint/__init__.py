@@ -206,7 +206,7 @@ class EdulintConfigPage(ConfigurationPage):
         )
         self.add_checkbox(
             "edulint.enable_exception_remote_reporting",
-            tr("Send the logs for exceptions/errors."),
+            tr("Send the logs for exceptions/errors. This includes stacktraces which could reveal your username."),
             row=10,
             columnspan=2,
         )
@@ -215,6 +215,7 @@ class EdulintConfigPage(ConfigurationPage):
             "The data is used for the following purposes:\n"
             " - Improvement of EduLint\n"
             " - Academic research\n"
+            "All data used for academic research undergoes additional anonymization first to ensure it doesn't contain any personally identifiable information.\n"
             "\n"
             "If you previously submitted some data and wish to remove them, send an email to anna.rechtackova@mail.muni.cz\n"
             "with subject 'Thonny-Edulint Data Request'. In the body of the email include the following identifier:\n"

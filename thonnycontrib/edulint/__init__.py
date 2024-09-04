@@ -9,6 +9,7 @@ from typing import Dict
 from pathlib import Path
 from threading import Thread
 import traceback
+import os
 
 from tkinter import ttk
 
@@ -37,9 +38,23 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         """Returns if the user has the option enabled"""
         return get_workbench().get_option("edulint.enabled")
 
+    # kudos for env preparation goes to @ettore-galli https://github.com/ettore-galli/thonny-black-formatter/blob/main/thonnycontrib/black_formatter/__init__.py#L41
+    # we just copy the env and pass it as variable, instead of overwriting os.environ thonny-wide
+    def prepare_run_environment(self):
+        env = os.environ.copy()
+
+        plugins_folders = [folder for folder in sys.path if "plugins" in folder]
+        plugins_folder = os.path.join(plugins_folders[0])
+        binfolder = plugins_folder.replace("lib/python/site-packages", "bin")
+
+        env["PYTHONPATH"] = plugins_folder + (
+            ":" + env["PYTHONPATH"] if "PYTHONPATH" in env.keys() else ""
+        )
+        env["PATH"] = binfolder + ":" + plugins_folder + ":" + env["PATH"]
+        return env
+
     def start_analysis(self, main_file_path, imported_file_paths):
         """Runs edulint on the currently open file."""
-        # python_executable_path = sys.executable
         python_executable_path = get_front_interpreter_for_subprocess()
 
         if get_workbench().get_option("edulint.enable_code_remote_reporting", default=False):
@@ -50,6 +65,7 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
+            env=self.prepare_run_environment(),
             on_completion=partial(self._parse_and_output_warnings, main_file_path),
         )
 

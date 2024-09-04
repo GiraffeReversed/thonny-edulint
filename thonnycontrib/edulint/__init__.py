@@ -15,6 +15,8 @@ from tkinter import ttk
 from thonny import get_workbench, ui_utils
 from thonny.config_ui import ConfigurationPage
 from thonny.languages import tr
+from thonny.running import get_front_interpreter_for_subprocess
+
 from thonnycontrib.edulint.view import EduLintView, SubprocessProgramAnalyzer, add_program_analyzer
 from thonnycontrib.edulint.update_dialog import check_updates_with_notification, UpdateDialog
 from thonnycontrib.edulint.edulint_unavailable_dialog import EdulintUnavailableDialog
@@ -37,7 +39,8 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
 
     def start_analysis(self, main_file_path, imported_file_paths):
         """Runs edulint on the currently open file."""
-        python_executable_path = sys.executable
+        # python_executable_path = sys.executable
+        python_executable_path = get_front_interpreter_for_subprocess()
 
         if get_workbench().get_option("edulint.enable_code_remote_reporting", default=False):
             send_code(main_file_path)

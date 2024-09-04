@@ -8,7 +8,7 @@ on:
   workflow_call:
   push:
     tags:
-      - 'v*.*.*'
+    - 'v*.*.*'
 
 permissions:
   contents: write
@@ -22,7 +22,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: '3.8'
+        python-version: '3.12'
 
     - name: Install dependencies
       run: |

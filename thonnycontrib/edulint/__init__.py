@@ -45,13 +45,30 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         if get_workbench().get_option("edulint.enable_code_remote_reporting", default=False):
             send_code(main_file_path)
 
-        self._proc = ui_utils.popen_with_ui_thread_callback(
-            [python_executable_path, "-m", "edulint", "check", "--disable-version-check", "--json", main_file_path],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-            on_completion=partial(self._parse_and_output_warnings, main_file_path),
-        )
+        path = main_file_path
+        config = edulint.get_config_one(path, [])
+        results = edulint.lint_one(path, config)
+
+        def to_json(configs, problems) -> str:
+            def config_to_json(obj) -> str:
+                return {arg.option.to_name(): arg.val for arg in obj.config}
+
+            config_json = json.dumps(
+                [config for config, _translation in configs], default=config_to_json
+            )
+            problems_json = edulint.Problem.schema().dumps(problems, indent=2, many=True)
+            return f'{{"configs": {config_json}, "problems": {problems_json}}}'
+
+        results_str = to_json([config], results)
+        self._parse_and_output_warnings(main_file_path, None, results_str.split("\n"), [""])
+
+        # self._proc = ui_utils.popen_with_ui_thread_callback(
+        #     [python_executable_path, "-m", "edulint", "check", "--disable-version-check", "--json", main_file_path],
+        #     stdout=subprocess.PIPE,
+        #     stderr=subprocess.PIPE,
+        #     universal_newlines=True,
+        #     on_completion=partial(self._parse_and_output_warnings, main_file_path),
+        # )
 
     def _parse_and_output_warnings(self, main_file_path, _, out_lines, err_lines):
         """Parses the edulint output and sends it to thonny"""

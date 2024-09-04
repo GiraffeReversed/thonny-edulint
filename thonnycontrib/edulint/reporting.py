@@ -4,6 +4,7 @@ import hashlib
 import json
 import logging
 import threading
+import re
 
 from thonnycontrib.edulint.version_checker import PackageInfoManager
 from platformdirs import PlatformDirs
@@ -134,6 +135,19 @@ def send_results(filepath: str, results: str):
     })
 
 def send_errors(filepath: str, err: str):
+    def sanitize_stacktrace(text: str) -> str:
+        # Partial local scrub of some personally identifiable information from stacktraces
+        # Additional cleanup is done server side
+        try:
+            answer = text
+            answer = re.sub(r'[a-zA-Z]\:\\Users\\[a-zA-Z0-9]+\\', r'C:\\Users\\REDACTED\\', answer)
+            answer = re.sub(r'/home/[a-zA-Z0-9]+/', r'/home/REDACTED/', answer)
+            return answer
+        except Exception as e:
+            logging.getLogger("EduLint").error(str(e))
+            return text
+    
+    err = sanitize_stacktrace(err)
     _send_generic(filepath, 'result', {
         'errors': err,  # TODO: Should we base64 this? 
     })

@@ -213,7 +213,7 @@ class EdulintConfigPage(ConfigurationPage):
         )
         self.add_checkbox(
             "edulint.enable_exception_remote_reporting",
-            tr("Send the logs for exceptions/errors. This includes stacktraces which could reveal your username."),
+            tr("Send the logs for exceptions/errors."),
             row=10,
             columnspan=2,
         )

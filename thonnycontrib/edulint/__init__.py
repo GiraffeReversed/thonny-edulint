@@ -224,7 +224,7 @@ class EdulintConfigPage(ConfigurationPage):
             " - Academic research\n"
             "All data used for academic research undergoes additional anonymization first to ensure it doesn't contain any personally identifiable information.\n"
             "\n"
-            "If you previously submitted some data and wish to remove them, send an email to anna.rechtackova@mail.muni.cz\n"
+            "If you previously submitted some data and wish to remove them, send an email to privacy@edulint.com\n"
             "with subject 'Thonny-Edulint Data Request'. In the body of the email include the following identifier:\n"
             f"   {get_reporting_user_id()}"
             ), justify="left", anchor="w"

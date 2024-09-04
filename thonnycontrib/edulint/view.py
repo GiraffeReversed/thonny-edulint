@@ -167,7 +167,7 @@ class EduLintView(tktextext.TextFrame):
             self.text.append_rst(self._present_summary(warnings))
 
             if config is not None:
-                self.text.append_rst(f"used configuration: {config}", ("em",))
+                self.text.append_rst(f"used configuration: {config.get('config-file', 'unknown')}", ("em",))
 
             if len(warnings) == 0:
                 self.text.append_rst(

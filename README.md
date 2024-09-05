@@ -23,6 +23,11 @@ After installing you will need to restart Thonny.
 
 ### Known issues
 
+Thonny-EduLint versions until `0.6.2` (released 2024-09-05) guided users to install Thonny Plugin `thonny-edulint` and Thonny Package `edulint`. Versions `0.6.2` and later work around this issue, now it's sufficient to install just Thonny Plugin `thonny-edulint`.
+
+<details>
+  <summary>Original recommendation (now outdated)</summary>
+
 Due to bug in Thonny 4.0.0 to (at least) 4.1.4 there are two steps required to install `thonny-edulint`.
 
 1. Thonny -> Tools -> Manage plug-ins... -> thonny-edulint -> Install
@@ -31,6 +36,8 @@ Due to bug in Thonny 4.0.0 to (at least) 4.1.4 there are two steps required to i
 If you forget the second step, the code linting will fail and give you a message reminding you that it's necessary.
 
 The bug should be fixed in Thonny 4.1.2, after which this workaround shouldn't be necessary. More info is in [this issue](https://github.com/GiraffeReversed/thonny-edulint/issues/2) and the one referred from it.
+
+</details>
 
 ## Screenshot demo
 

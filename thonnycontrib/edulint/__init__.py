@@ -10,6 +10,7 @@ from pathlib import Path
 from threading import Thread
 import traceback
 import os
+import importlib
 
 from tkinter import ttk
 
@@ -22,8 +23,8 @@ from thonnycontrib.edulint.view import EduLintView, SubprocessProgramAnalyzer, a
 from thonnycontrib.edulint.update_dialog import check_updates_with_notification, UpdateDialog
 from thonnycontrib.edulint.edulint_unavailable_dialog import EdulintUnavailableDialog
 from thonnycontrib.edulint.reporting import get_reporting_user_id, send_code, send_results, send_errors, EdulintReportingFirstTimeDialog
+from thonnycontrib.edulint.utils import add_path, get_pylint_plugins_dir
 
-import edulint
 import m2r2
 
 
@@ -179,6 +180,8 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
     @staticmethod
     @lru_cache
     def _get_all_edulint_explanations():
+        with add_path(get_pylint_plugins_dir()):
+            edulint = importlib.import_module('edulint')
         return edulint.get_explanations()
 
 

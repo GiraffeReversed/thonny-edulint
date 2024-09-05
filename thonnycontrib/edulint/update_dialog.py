@@ -48,13 +48,22 @@ class UpdateDialog(CommonDialog):
             error_label.grid(row=1, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 15))
             return
 
-        no_updates = "There are currently no updates available, you have the newest versions.\n"
-        update_for_edulint = "New version of EduLint is available.\nYou can update it through: " \
-                             "Main menu -> Tools -> Manage packages... -> search for EduLint -> click Upgrade. " \
-                             "After that, you have to restart Thonny.\n\n"
-        update_for_thonny_edulint = "New version of Thonny-EduLint is available.\nYou can update it through: " \
-                                    "Main menu -> Tools -> Manage plug-ins... -> search for Thonny-EduLint -> click " \
-                                    "Upgrade. After that, you have to restart Thonny.\n\n"
+        no_updates = "You have the newest version.\n\n"      
+        
+        update_thonny_edulint_instructions = """
+New version of Thonny-EduLint is available.
+You can update through:
+   Main menu -> Tools -> Manage plug-ins... -> search for Thonny-EduLint -> click Upgrade.
+After that, you have to restart Thonny.\n\n
+"""
+
+        update_just_edulint_instructions = """
+New version of EduLint is available.
+You can update through:
+   Main menu -> Tools -> Manage plug-ins... -> search for Thonny-EduLint -> click '...' -> select the newest version and check 'Upgrade dependencies' -> click Install
+After that, you have to restart Thonny.\n\n
+"""
+
         current_state = f"""\nCurrent state:
 EduLint: installed version = {edulint_local_version}; newest version = {edulint_latest_version}
 Thonny-EduLint: installed version = {thonny_edulint_local_version}; newest version = {thonny_edulint_latest_version}"""
@@ -62,10 +71,10 @@ Thonny-EduLint: installed version = {thonny_edulint_local_version}; newest versi
         intro_label = ttk.Label(
             main_frame,
             text=(
-                (no_updates if not (thonny_edulint_is_outdated or edulint_is_outdated) else "")
-                + (update_for_edulint if edulint_is_outdated else "")
-                + (update_for_thonny_edulint if thonny_edulint_is_outdated else "")
-                + current_state
+                (update_thonny_edulint_instructions if thonny_edulint_is_outdated else "") +
+                (update_just_edulint_instructions if edulint_is_outdated and not thonny_edulint_is_outdated else "") +
+                (no_updates if not edulint_is_outdated and not thonny_edulint_is_outdated else "") +
+                current_state
             ),
             wraplength=550,
         )

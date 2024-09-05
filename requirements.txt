@@ -1,4 +1,4 @@
-thonny >= 3.0.0
+thonny ~= 4.0
 edulint ~= 4.0
 m2r2
 Pygments

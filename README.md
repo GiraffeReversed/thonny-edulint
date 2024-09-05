@@ -2,6 +2,7 @@
 
 [![Pypi](https://img.shields.io/pypi/v/thonny-edulint?color=blue)](https://pypi.org/project/edulint/)
 ![Python versions](https://img.shields.io/badge/python-%3E%3D%203.8-blue)
+![Thonny versions](https://img.shields.io/badge/Thonny-%7E%3D%204.x-blue)
 
 
 A [Thonny](https://github.com/thonny/thonny) plugin to add most of [EduLint](https://github.com/GiraffeReversed/edulint)'s warnings.

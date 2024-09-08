@@ -15,7 +15,7 @@ from thonny import get_workbench
 from thonny.ui_utils import CommonDialog
 from thonny.languages import tr
 
-REPORTING_URL = 'https://edulint.com/api/reporting'
+REPORTING_URL = 'https://edulint.com/api/thonny'
 
 class EdulintReportingFirstTimeDialog(CommonDialog):
     def __init__(self, master):

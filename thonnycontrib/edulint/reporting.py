@@ -17,6 +17,15 @@ from thonny.languages import tr
 
 REPORTING_URL = 'https://edulint.com/api/thonny'
 
+logger = logging.getLogger("EduLint")
+logger.setLevel(logging.DEBUG)
+
+fh = logging.FileHandler('c:/tmp/edulint.log')
+fh.setLevel(logging.DEBUG)
+formatter = logging.Formatter('[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s','%m-%d %H:%M:%S')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
 class EdulintReportingFirstTimeDialog(CommonDialog):
     def __init__(self, master):
         super().__init__(master=master)

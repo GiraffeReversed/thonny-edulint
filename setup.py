@@ -8,7 +8,7 @@ with open("requirements.txt", "r", encoding="utf-8") as f:
 
 setuptools.setup(
     name="thonny-edulint",
-    version="0.6.4",
+    version="0.7.0",
     author="Anna Rechtackova",
     author_email="anna.rechtackova@mail.muni.cz",
     description="A plugin that adds EduLint warnings to the Thonny Python IDE.",
@@ -28,6 +28,6 @@ setuptools.setup(
         "Bug Tracker": "https://github.com/GiraffeReversed/thonny-edulint/issues",
     },
     install_requires=requirements,
-    python_requires=">=3.7",
+    python_requires=">=3.8",  # This plugin might run on 3.7, but EduLint itself requires 3.8+.
     package_data={"thonnycontrib.edulint": ["broom-green.png"]},
 )

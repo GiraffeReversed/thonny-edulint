@@ -126,12 +126,13 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         else:
             config = edulint_result["configs"][0]
 
-        number_of_succesful_lints = get_workbench().get_option("assistance.number_of_successful_lints", 0) + 1
-        get_workbench().set_option("assistance.number_of_successful_lints", number_of_succesful_lints)   
+        if get_workbench().get_option("edulint.enable_first_time_reporting_dialog"):
+            n_successful_lints_until_first_time_reporting_dialog = get_workbench().get_option("edulint.n_successful_lints_until_first_time_reporting_dialog") - 1
+            get_workbench().set_option("edulint.n_successful_lints_until_first_time_reporting_dialog", n_successful_lints_until_first_time_reporting_dialog)
 
-        if number_of_succesful_lints == 8 and get_workbench().get_option("assistance.has_user_seen_reporting_dialog", False) is False:
-            get_workbench().set_option("assistance.has_user_seen_reporting_dialog", True)
-            get_workbench().event_generate("<<EduLintOpenReportingFirstTimeDialog>>", when="tail")
+            if n_successful_lints_until_first_time_reporting_dialog <= 0 and get_workbench().get_option("edulint.has_user_seen_reporting_dialog", False) is False:
+                get_workbench().set_option("edulint.has_user_seen_reporting_dialog", True)
+                get_workbench().event_generate("<<EduLintOpenReportingFirstTimeDialog>>", when="tail")
 
         self.completion_handler(self, warnings, config)
 
@@ -316,8 +317,9 @@ def load_plugin():
     get_workbench().set_default("edulint.force_disable_result_remote_reporting", False)
     get_workbench().set_default("edulint.force_disable_exception_remote_reporting", False)
     
+    get_workbench().set_default("edulint.enable_first_time_reporting_dialog", False)
     get_workbench().set_default("edulint.has_user_seen_reporting_dialog", False)
-    get_workbench().set_default("edulint.number_of_successful_lints", 0)
+    get_workbench().set_default("edulint.n_successful_lints_until_first_time_reporting_dialog", 8)
 
 
     if get_workbench().get_option("edulint.enabled"):

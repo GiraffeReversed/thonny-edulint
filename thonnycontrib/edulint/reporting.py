@@ -184,6 +184,7 @@ def process_reporting_settings_result(resp: requests.Response):
         "force_disable_code_remote_reporting",
         "force_disable_result_remote_reporting",
         "force_disable_exception_remote_reporting",
+        "enable_first_time_reporting_dialog",
     ]
     for acceptable_key in whitelisted_thonny_edulint_keys:
         if acceptable_key in data:

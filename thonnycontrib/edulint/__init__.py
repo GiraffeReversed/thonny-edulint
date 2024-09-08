@@ -74,11 +74,11 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
     def _parse_and_output_warnings(self, main_file_path, _, out_lines, err_lines):
         """Parses the edulint output and sends it to thonny"""
 
-        for error in err_lines:
-            logging.getLogger("EduLint").error(error)
+        if err_lines:
+            logging.getLogger("EduLint").error("".join(err_lines))
 
         if get_workbench().get_option("edulint.enable_exception_remote_reporting", default=False):
-            err_str = "".join(err_lines) # TODO: can the join itself fail?
+            err_str = "".join(err_lines)
             if err_str:
                 send_errors(main_file_path, err_str)  
                 # TODO: This is covering edulint errors, but not thonny edulint errors
@@ -90,8 +90,8 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         try:
             edulint_result = json.loads(out)
         except json.decoder.JSONDecodeError as e:
-            logging.getLogger("EduLint").error("failed to parse output:\n%s\n", out)
-            logging.getLogger("EduLint").error(e)
+            logging.getLogger("EduLint").error("failed to parse output: '%s'", out)
+            logging.getLogger("EduLint").error(e, exc_info=True)
 
             if get_workbench().get_option("edulint.enable_exception_remote_reporting", default=False):
                 send_errors(main_file_path, traceback.format_exc())
@@ -109,6 +109,7 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
             }]
             get_workbench().event_generate("<<EduLintOpenEdulintUnavailableDialog>>", when="tail")
             self.completion_handler(self, warnings, config=None)
+            logging.getLogger("EduLint").error("Output of the linting that couldn't be parsed: '" + out + "'")
             raise LintingError(
                 "Unable to decode results of linting. "
                 "Try installing edulint as a package: "

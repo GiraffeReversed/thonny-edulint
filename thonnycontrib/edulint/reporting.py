@@ -108,7 +108,7 @@ def _post_sync(url: str, json_data: dict, headers: dict, callback: callable = No
         if callback:
             callback(resp)
     except Exception as e:
-        logging.getLogger("EduLint").error(str(e))
+        logging.getLogger("EduLint").error(e, exc_info=True)
 
 def post_async(url: str, json_data: dict, headers: dict = None, callback: callable = None): 
     threading.Thread(target=_post_sync, args=(url, json_data, headers, callback)).start()
@@ -131,7 +131,7 @@ def send_code(filepath: str):
         with open(filepath, 'r') as f:  # TODO: do we need to set encoding (especially on Windows?)
             file_content = f.read()
     except Exception as e:
-        logging.getLogger("EduLint").error(str(e))
+        logging.getLogger("EduLint").error(e, exc_info=True)
     post_async_with_session_id(filepath, 'code', {
         'code': file_content, # TODO: Should we base64 this? 
     })
@@ -155,7 +155,7 @@ def send_errors(filepath: str, err: str):
             answer = re.sub(r'/home/[a-zA-Z0-9]+/', r'/home/REDACTED/', answer)
             return answer
         except Exception as e:
-            logging.getLogger("EduLint").error(str(e))
+            logging.getLogger("EduLint").error(e, exc_info=True)
             return text
     
     if get_workbench().get_option(f"edulint.force_disable_code_remote_reporting"):

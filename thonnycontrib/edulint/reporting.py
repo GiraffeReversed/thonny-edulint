@@ -97,40 +97,51 @@ def get_reporting_user_id() -> str:
         return ID_FAILURE
 
 def get_file_session_id(filepath) -> str:
-    fileid = str_to_sha256(filepath, 10)
+    fileid = str_to_sha256(filepath, 10) if filepath else ""
     return f"{get_reporting_user_id()}:{fileid}"
 
 
-def _post_sync(url: str, json_data: dict, headers: dict):
+def _post_sync(url: str, json_data: dict, headers: dict, callback: callable = None):
     try:
-        requests.post(url, json=json_data, headers=headers)
+        logging.getLogger("EduLint").info("Sending reporting POST.")
+        resp = requests.post(url, json=json_data, headers=headers)
+        if callback:
+            callback(resp)
     except Exception as e:
         logging.getLogger("EduLint").error(str(e))
 
-def post_async(url: str, json_data: dict, headers: dict = None): 
-    threading.Thread(target=_post_sync, args=(url, json_data, headers)).start()
+def post_async(url: str, json_data: dict, headers: dict = None, callback: callable = None): 
+    threading.Thread(target=_post_sync, args=(url, json_data, headers, callback)).start()
 
-def _send_generic(filepath: str, type: str, data: dict):
+def post_async_with_session_id(filepath: str, type: str, data: dict, callback: callable = None):
     common_data = {
         'type': type,
         'session_id': get_file_session_id(filepath),
     }
-    post_async(REPORTING_URL, json_data={**common_data, **data})
+    post_async(REPORTING_URL, json_data={**common_data, **data}, callback=callback)
 
 # WARNING: The following functions MUST NEVER fail and be ASYNC
 
 def send_code(filepath: str):
+    if get_workbench().get_option(f"edulint.force_disable_code_remote_reporting"):
+        logging.getLogger("EduLint").debug("Source code not sent, reporting is remotely disabled.")
+        return
+
     try:
         with open(filepath, 'r') as f:  # TODO: do we need to set encoding (especially on Windows?)
             file_content = f.read()
     except Exception as e:
         logging.getLogger("EduLint").error(str(e))
-    _send_generic(filepath, 'code', {
+    post_async_with_session_id(filepath, 'code', {
         'code': file_content, # TODO: Should we base64 this? 
     })
 
 def send_results(filepath: str, results: str):
-    _send_generic(filepath, 'result', {
+    if get_workbench().get_option(f"edulint.force_disable_result_remote_reporting"):
+        logging.getLogger("EduLint").debug("Linting results not sent, reporting is remotely disabled.")
+        return
+
+    post_async_with_session_id(filepath, 'result', {
         'results': results, # TODO: Should we base64 this? 
     })
 
@@ -147,7 +158,33 @@ def send_errors(filepath: str, err: str):
             logging.getLogger("EduLint").error(str(e))
             return text
     
+    if get_workbench().get_option(f"edulint.force_disable_code_remote_reporting"):
+        logging.getLogger("EduLint").debug("Stacktrace not sent, reporting is remotely disabled.")
+        return
+
     err = sanitize_stacktrace(err)
-    _send_generic(filepath, 'result', {
+    post_async_with_session_id(filepath, 'error', {
         'errors': err,  # TODO: Should we base64 this? 
     })
+
+
+def get_reporting_server_settings():
+    post_async_with_session_id(filepath="filepath", type='thonny-settings', data={}, callback=process_reporting_settings_result)
+
+def process_reporting_settings_result(resp: requests.Response):
+    logging.getLogger("EduLint").debug(f"Reporting settings: parsing server response {resp}")
+    if resp.status_code != 200:
+        get_workbench().set_option("edulint.force_disable_code_remote_reporting", True)
+        get_workbench().set_option("edulint.force_disable_result_remote_reporting", True)
+        get_workbench().set_option("edulint.force_disable_exception_remote_reporting", True)
+        return
+    data = resp.json()
+    
+    whitelisted_thonny_edulint_keys = [
+        "force_disable_code_remote_reporting",
+        "force_disable_result_remote_reporting",
+        "force_disable_exception_remote_reporting",
+    ]
+    for acceptable_key in whitelisted_thonny_edulint_keys:
+        if acceptable_key in data:
+            get_workbench().set_option(f"edulint.{acceptable_key}", data[acceptable_key])

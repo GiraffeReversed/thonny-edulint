@@ -22,7 +22,8 @@ from thonny.running import get_front_interpreter_for_subprocess
 from thonnycontrib.edulint.view import EduLintView, SubprocessProgramAnalyzer, add_program_analyzer
 from thonnycontrib.edulint.update_dialog import check_updates_with_notification, UpdateDialog
 from thonnycontrib.edulint.edulint_unavailable_dialog import EdulintUnavailableDialog
-from thonnycontrib.edulint.reporting import get_reporting_user_id, send_code, send_results, send_errors, EdulintReportingFirstTimeDialog
+from thonnycontrib.edulint.reporting import get_reporting_user_id, get_reporting_server_settings, send_code, send_results, send_errors, EdulintReportingFirstTimeDialog
+from thonnycontrib.edulint.announcement_dialog import check_for_announcement, AnnouncementDialog
 from thonnycontrib.edulint.utils import add_path, get_pylint_plugins_dir
 
 import m2r2
@@ -220,27 +221,41 @@ class EdulintConfigPage(ConfigurationPage):
         reporting_intro = ttk.Label(self, text=tr("To futher improve EduLint and research code quality we need data about your usage of EduLint. Will you help us collect this anonymous data?"))
         reporting_intro.grid(row=7, columnspan=2)
 
+        reporting_disabled_label = '    [not-collected-by-server]'
+        reporting_disabled_text = "[not-collected-by-server]: Our server currently doesn't want this type of data, so this EduLint instance won't send it even if you allow it. This may change in future, so feel free to set your desired settings now.\n\n"
+
         self.add_checkbox(
             "edulint.enable_result_remote_reporting",
-            tr("Send the linting results, i.e. which issues appeared in you code."),
+            tr("Send the linting results, i.e. which issues appeared in you code." + 
+                (reporting_disabled_label if get_workbench().get_option("edulint.force_disable_result_remote_reporting") else "")
+            ),
             row=8,
             columnspan=2,
         )
 
         self.add_checkbox(
             "edulint.enable_code_remote_reporting",
-            tr("Send the code itself."),
+            tr("Send the code itself." +
+               (reporting_disabled_label if get_workbench().get_option("edulint.force_disable_code_remote_reporting") else "")
+            ),
             row=9,
             columnspan=2,
         )
         self.add_checkbox(
             "edulint.enable_exception_remote_reporting",
-            tr("Send the logs for exceptions/errors."),
+            tr("Send the logs for exceptions/errors." +
+               (reporting_disabled_label if get_workbench().get_option("edulint.force_disable_exception_remote_reporting") else "")
+            ),
             row=10,
             columnspan=2,
         )
 
-        reporting_outro = ttk.Label(self, text=tr(
+        reporting_outro = ttk.Label(self, text=tr(  # TODO: Dynamic fields like this area likely impossible to translate.
+            (reporting_disabled_text if any((
+                get_workbench().get_option("edulint.force_disable_result_remote_reporting"),
+                get_workbench().get_option("edulint.force_disable_code_remote_reporting"),
+                get_workbench().get_option("edulint.force_disable_exception_remote_reporting"),
+            )) else "") +
             "The data is used for the following purposes:\n"
             " - Improvement of EduLint\n"
             " - Academic research\n"
@@ -289,11 +304,20 @@ def load_plugin():
     get_workbench().set_default("edulint.enabled", True)
     get_workbench().set_default("edulint.open_edulint_on_warnings", False)
     get_workbench().set_default("edulint.disable_version_check", False)
+
+    # User can choose which data should be sent.
     get_workbench().set_default("edulint.enable_code_remote_reporting", False)
     get_workbench().set_default("edulint.enable_result_remote_reporting", False)
     get_workbench().set_default("edulint.enable_exception_remote_reporting", False)
+
+    # Server can remotely force client to stop sending data.
+    get_workbench().set_default("edulint.force_disable_code_remote_reporting", False)
+    get_workbench().set_default("edulint.force_disable_result_remote_reporting", False)
+    get_workbench().set_default("edulint.force_disable_exception_remote_reporting", False)
+    
     get_workbench().set_default("edulint.has_user_seen_reporting_dialog", False)
     get_workbench().set_default("edulint.number_of_successful_lints", 0)
+
 
     if get_workbench().get_option("edulint.enabled"):
         get_workbench().set_default("assistance.use_pylint", False)
@@ -346,3 +370,5 @@ def load_plugin():
     get_workbench().bind("<<EduLintOpenEdulintUnavailableDialog>>", lambda _: ui_utils.show_dialog(EdulintUnavailableDialog(get_workbench())), add=True)  
     get_workbench().bind("<<EduLintOpenReportingFirstTimeDialog>>", lambda _: ui_utils.show_dialog(EdulintReportingFirstTimeDialog(get_workbench())), add=True)
     Thread(target=check_updates_with_notification).start() # note: might want to call this only after event WorkbenchReady
+    get_reporting_server_settings()  # This has it's own async wrapper
+    check_for_announcement()  # This has it's own async wrapper

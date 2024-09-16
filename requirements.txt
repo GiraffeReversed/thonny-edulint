@@ -1,6 +1,5 @@
 thonny ~= 4.0
 edulint ~= 4.0
-m2r2
-Pygments
+mistune ~= 3.0
 requests
 platformdirs

@@ -26,7 +26,8 @@ from thonnycontrib.edulint.reporting import get_reporting_user_id, get_reporting
 from thonnycontrib.edulint.announcement_dialog import check_for_announcement, AnnouncementDialog
 from thonnycontrib.edulint.utils import add_path, get_pylint_plugins_dir
 
-import m2r2
+import mistune
+from mistune.renderers.rst import RSTRenderer
 
 
 class LintingError(Exception):
@@ -80,7 +81,7 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         if get_workbench().get_option("edulint.enable_exception_remote_reporting", default=False):
             err_str = "".join(err_lines)
             if err_str:
-                send_errors(main_file_path, err_str)  
+                send_errors(main_file_path, err_str)
                 # TODO: This is covering edulint errors, but not thonny edulint errors
 
         out = "".join(out_lines)
@@ -95,18 +96,18 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
 
             if get_workbench().get_option("edulint.enable_exception_remote_reporting", default=False):
                 send_errors(main_file_path, traceback.format_exc())
-        
-            warnings = [{
-                "explanation_rst": "" 
-                    "Unable to decode results of linting. Install edulint as a package:\n"
-                    "  Tools -> Manage packages... -> search edulint -> Install",
-                "msg": "Linting failed. Check description with instructions how to fix it.",
-                "filename": "EMPTY",
-                "lineno": 1, 
-                "col_offset": 1,
-                "code": "X000",
-                "enabled_by": "thonny-edulint",
-            }]
+
+            warnings = [
+                {
+                    "explanation_rst": "" "Unable to decode results of linting. Install edulint as a package:\n" "  Tools -> Manage packages... -> search edulint -> Install",
+                    "msg": "Linting failed. Check description with instructions how to fix it.",
+                    "filename": "EMPTY",
+                    "lineno": 1,
+                    "col_offset": 1,
+                    "code": "X000",
+                    "enabled_by": "thonny-edulint",
+                }
+            ]
             get_workbench().event_generate("<<EduLintOpenEdulintUnavailableDialog>>", when="tail")
             self.completion_handler(self, warnings, config=None)
             logging.getLogger("EduLint").error("Output of the linting that couldn't be parsed: '" + out + "'")
@@ -170,10 +171,11 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         if "examples" in specific_explanation:
             text_explanation_md += "\n" + specific_explanation["examples"] + "\n"
 
-        text_explanation_rst = m2r2.convert(text_explanation_md)
+        md = mistune.create_markdown(renderer=RSTRenderer())
+        text_explanation_rst = md(text_explanation_md)
         # This can be used to replace code-block with literal block.
         # text_explanation_rst = text_explanation_rst.replace(".. code-block:: py", "::")
-        text_explanation_rst = text_explanation_rst.replace(".. code-block:: py", ".. code::")
+        text_explanation_rst = text_explanation_rst.replace(".. code:: py", ".. code::")
 
         # Syntax can be checked for example here:
         # https://raw.githubusercontent.com/thonny/thonny/66b3cb853cfc28ec504d29090d55ec86eee3f178/thonny/plugins/help/debugging.rst
@@ -228,9 +230,7 @@ class EdulintConfigPage(ConfigurationPage):
 
         self.add_checkbox(
             "edulint.enable_result_remote_reporting",
-            tr("Send the linting results, i.e. which issues appeared in you code." + 
-                (reporting_disabled_label if get_workbench().get_option("edulint.force_disable_result_remote_reporting") else "")
-            ),
+            tr("Send the linting results, i.e. which issues appeared in you code." + (reporting_disabled_label if get_workbench().get_option("edulint.force_disable_result_remote_reporting") else "")),
             row=8,
             columnspan=2,
         )
@@ -269,7 +269,6 @@ class EdulintConfigPage(ConfigurationPage):
             ), justify="left", anchor="w"
         )
         reporting_outro.grid(row=11, columnspan=2, sticky = "W")
-
 
     def apply(self):
         if get_workbench().get_option("edulint.enabled"):
@@ -316,11 +315,10 @@ def load_plugin():
     get_workbench().set_default("edulint.force_disable_code_remote_reporting", False)
     get_workbench().set_default("edulint.force_disable_result_remote_reporting", False)
     get_workbench().set_default("edulint.force_disable_exception_remote_reporting", False)
-    
+
     get_workbench().set_default("edulint.enable_first_time_reporting_dialog", False)
     get_workbench().set_default("edulint.has_user_seen_reporting_dialog", False)
     get_workbench().set_default("edulint.n_successful_lints_until_first_time_reporting_dialog", 8)
-
 
     if get_workbench().get_option("edulint.enabled"):
         get_workbench().set_default("assistance.use_pylint", False)
@@ -369,8 +367,8 @@ def load_plugin():
     )
 
     # Always use <<event>> for call that may come from threads. Tkinter ensures it runs on main thread. Thonny's custom implementation (i.e. without <<event>>) doesn't and it may get  processed on non-main thread.
-    get_workbench().bind("<<EduLintOpenUpdateWindow>>", lambda _: ui_utils.show_dialog(UpdateDialog(get_workbench())), add=True)  
-    get_workbench().bind("<<EduLintOpenEdulintUnavailableDialog>>", lambda _: ui_utils.show_dialog(EdulintUnavailableDialog(get_workbench())), add=True)  
+    get_workbench().bind("<<EduLintOpenUpdateWindow>>", lambda _: ui_utils.show_dialog(UpdateDialog(get_workbench())), add=True)
+    get_workbench().bind("<<EduLintOpenEdulintUnavailableDialog>>", lambda _: ui_utils.show_dialog(EdulintUnavailableDialog(get_workbench())), add=True)
     get_workbench().bind("<<EduLintOpenReportingFirstTimeDialog>>", lambda _: ui_utils.show_dialog(EdulintReportingFirstTimeDialog(get_workbench())), add=True)
     get_workbench().bind("<<EduLintOpenAnnouncementDialog>>", lambda _: ui_utils.show_dialog(AnnouncementDialog(get_workbench())), add=True)
     Thread(target=check_updates_with_notification).start() # note: might want to call this only after event WorkbenchReady

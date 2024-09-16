@@ -371,6 +371,5 @@ def load_plugin():
     get_workbench().bind("<<EduLintOpenEdulintUnavailableDialog>>", lambda _: ui_utils.show_dialog(EdulintUnavailableDialog(get_workbench())), add=True)
     get_workbench().bind("<<EduLintOpenReportingFirstTimeDialog>>", lambda _: ui_utils.show_dialog(EdulintReportingFirstTimeDialog(get_workbench())), add=True)
     get_workbench().bind("<<EduLintOpenAnnouncementDialog>>", lambda _: ui_utils.show_dialog(AnnouncementDialog(get_workbench())), add=True)
-    Thread(target=check_updates_with_notification).start() # note: might want to call this only after event WorkbenchReady
     get_reporting_server_settings()  # This has it's own async wrapper
     check_for_announcement()  # This has it's own async wrapper

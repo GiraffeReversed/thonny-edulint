@@ -7,7 +7,6 @@ import json
 from functools import lru_cache, partial
 from typing import Dict
 from pathlib import Path
-from threading import Thread
 import traceback
 import os
 import importlib
@@ -21,7 +20,6 @@ from thonny.running import get_front_interpreter_for_subprocess
 
 from thonnycontrib.edulint.view import EduLintView, SubprocessProgramAnalyzer, add_program_analyzer
 from thonnycontrib.edulint.update_dialog import check_updates_with_notification, UpdateDialog
-from thonnycontrib.edulint.edulint_unavailable_dialog import EdulintUnavailableDialog
 from thonnycontrib.edulint.reporting import get_reporting_user_id, get_reporting_server_settings, send_code, send_results, send_errors, EdulintReportingFirstTimeDialog
 from thonnycontrib.edulint.announcement_dialog import check_for_announcement, AnnouncementDialog
 from thonnycontrib.edulint.utils import add_path, get_pylint_plugins_dir
@@ -91,7 +89,7 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
         try:
             edulint_result = json.loads(out)
         except json.decoder.JSONDecodeError as e:
-            logging.getLogger("EduLint").error("failed to parse output: '%s'", out)
+            logging.getLogger("EduLint").error("failed to parse EduLint's JSON output: '%s'", out)
             logging.getLogger("EduLint").error(e, exc_info=True)
 
             if get_workbench().get_option("edulint.enable_exception_remote_reporting", default=False):
@@ -99,8 +97,8 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
 
             warnings = [
                 {
-                    "explanation_rst": "" "Unable to decode results of linting. Install edulint as a package:\n" "  Tools -> Manage packages... -> search edulint -> Install",
-                    "msg": "Linting failed. Check description with instructions how to fix it.",
+                    "explanation_rst": "",
+                    "msg": "Linting failed. Try running EduLint again or restart Thonny.",
                     "filename": "EMPTY",
                     "lineno": 1,
                     "col_offset": 1,
@@ -108,14 +106,8 @@ class EdulintAnalyzer(SubprocessProgramAnalyzer):
                     "enabled_by": "thonny-edulint",
                 }
             ]
-            get_workbench().event_generate("<<EduLintOpenEdulintUnavailableDialog>>", when="tail")
             self.completion_handler(self, warnings, config=None)
-            logging.getLogger("EduLint").error("Output of the linting that couldn't be parsed: '" + out + "'")
-            raise LintingError(
-                "Unable to decode results of linting. "
-                "Try installing edulint as a package: "
-                "Tools -> Manage packages... -> search edulint -> Install"
-            ) from None
+            return
 
         warnings = []
         for edulint_finding in edulint_result["problems"]:
@@ -368,7 +360,6 @@ def load_plugin():
 
     # Always use <<event>> for call that may come from threads. Tkinter ensures it runs on main thread. Thonny's custom implementation (i.e. without <<event>>) doesn't and it may get  processed on non-main thread.
     get_workbench().bind("<<EduLintOpenUpdateWindow>>", lambda _: ui_utils.show_dialog(UpdateDialog(get_workbench())), add=True)
-    get_workbench().bind("<<EduLintOpenEdulintUnavailableDialog>>", lambda _: ui_utils.show_dialog(EdulintUnavailableDialog(get_workbench())), add=True)
     get_workbench().bind("<<EduLintOpenReportingFirstTimeDialog>>", lambda _: ui_utils.show_dialog(EdulintReportingFirstTimeDialog(get_workbench())), add=True)
     get_workbench().bind("<<EduLintOpenAnnouncementDialog>>", lambda _: ui_utils.show_dialog(AnnouncementDialog(get_workbench())), add=True)
     get_reporting_server_settings()  # This has it's own async wrapper

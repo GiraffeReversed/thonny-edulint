@@ -56,6 +56,17 @@ class add_path():
         except ValueError:
             pass
 
+# Thonny-specific
 def get_pylint_plugins_dir() -> str:
-    # TODO: some fallback?
-    return [path for path in sys.path if os.path.join("thonny", "plugins") in path.lower()][0]
+    possible_plugin_dirs = [  # in order of decreasing priority
+        os.path.join("thonny", "plugins"),  # covers most installations
+        os.path.join("thonny", "user_data", "plugins"),  # portable Thonny installation
+        # TODO: Some extremely generic fallback?
+    ]
+
+    for plugin_dir_substr in possible_plugin_dirs:
+        candidate_sys_paths = [path for path in sys.path if plugin_dir_substr in path.lower()]
+        if len(candidate_sys_paths) > 0:
+            return candidate_sys_paths[0]
+
+    raise Exception(f"Unknown thonny plugin path - please create a new issue at https://github.com/GiraffeReversed/thonny-edulint/issues/new?title=Unrecognized%20plugins%20directory&body=Place%20full%20error%20message%20here and in description include the following: {sys.path}")

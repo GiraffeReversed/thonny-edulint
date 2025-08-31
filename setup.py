@@ -8,7 +8,7 @@ with open("requirements.txt", "r", encoding="utf-8") as f:
 
 setuptools.setup(
     name="thonny-edulint",
-    version="0.7.3",
+    version="0.7.4",
     author="Anna Rechtackova",
     author_email="anna.rechtackova@mail.muni.cz",
     description="A plugin that adds EduLint warnings to the Thonny Python IDE.",
